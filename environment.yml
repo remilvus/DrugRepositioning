@@ -6,7 +6,6 @@ channels:
   - defaults
   - nvidia
 dependencies:
-  - torchvision # can be deleted when `example.py` is removed
   - wandb
   - pytorch-lightning
   - tensorboard
