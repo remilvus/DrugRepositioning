@@ -24,9 +24,6 @@ class SingleTargetDataModule(pl.LightningDataModule):
         print(f"Training set size: {len(self.df_train)}")
         print(f"Validation set size: {len(self.df_val)}")
 
-    def prepare_data(self) -> None:
-        super().prepare_data()
-
 
 class SingleTargetSmilesDataModule(SingleTargetDataModule):
     def __init__(self, target: str, data_dir: str = "../data", batch_size: int = 256):
@@ -48,5 +45,24 @@ class SingleTargetSmilesDataModule(SingleTargetDataModule):
     def val_dataloader(self):
         dataset = SmilesDataset(
             self.df_val, tokens=self.tokens, max_len=self.sentence_length
+        )
+        return DataLoader(dataset, batch_size=self.batch_size)
+
+
+class SingleTargetFeaturesDataModule(SingleTargetDataModule):
+    def __init__(self, target: str, featurizer, data_dir: str = "../data", batch_size: int = 256):
+        super().__init__(target, data_dir, batch_size)
+
+        self.featurizer = featurizer
+
+    def train_dataloader(self):
+        dataset = FeaturesDataset(
+            self.df_train, self.featurizer
+        )
+        return DataLoader(dataset, batch_size=self.batch_size)
+
+    def val_dataloader(self):
+        dataset = FeaturesDataset(
+            self.df_val, self.featurizer
         )
         return DataLoader(dataset, batch_size=self.batch_size)
