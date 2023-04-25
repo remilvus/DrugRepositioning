@@ -3,9 +3,9 @@ import torch
 from pytorch_lightning.loggers import WandbLogger
 import pytorch_lightning as pl
 
-from src.datamodules.single_target import SingleTargetSmilesDataModule
-from src.utils.data import get_target_names
-from src.model import SmilesTransformer
+from datamodules.single_target import SingleTargetSmilesDataModule
+from utils.data import get_target_names
+from model import SmilesTransformer
 
 
 if __name__ == "__main__":
