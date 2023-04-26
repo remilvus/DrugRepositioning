@@ -13,6 +13,8 @@ class SmilesTransformer(pl.LightningModule):
         num_heads=8,
         hidden_size=1024,
         dropout=0.1,
+        lr=1e-3,
+        name: str = "",
     ):
         super(SmilesTransformer, self).__init__()
         self.save_hyperparameters()
@@ -59,5 +61,5 @@ class SmilesTransformer(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = optim.Adam(self.parameters(), lr=1e-3)
+        optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr)
         return optimizer

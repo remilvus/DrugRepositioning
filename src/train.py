@@ -1,3 +1,5 @@
+from itertools import product
+
 import numpy as np
 import torch
 from pytorch_lightning.loggers import WandbLogger
@@ -9,28 +11,48 @@ from model import SmilesTransformer
 
 
 if __name__ == "__main__":
-    for num_layers in [2, 4]:
-        np.random.seed(0)
-        torch.random.manual_seed(0)
+    np.random.seed(0)
+    torch.random.manual_seed(0)
 
-        datamodule = SingleTargetSmilesDataModule(get_target_names()[0])
+    configs = {
+        'lr': [1e-3, 3e-3],
+        'num_layers': [4],
+        'num_heads': [2, 16, 64],
+        'hidden_size': [256, 1024],
+        'dropout': [0.1],
+        'name': get_target_names(),
+    }
+    configs = product(*[zip([name] * len(values), values)
+                       for name, values in configs.items()])
+
+    for hyperparams in configs:
+        hyperparams = dict(hyperparams)
+        name = hyperparams['name']
+        print(f"Training with config:\n{hyperparams}")
+        datamodule = SingleTargetSmilesDataModule(name)
 
         wandb_logger = WandbLogger(
-            project="Drug Repositioning", save_dir="../logs", tags=["baseline"]
-        )
+                project="Drug Repositioning",
+                save_dir="../logs",
+                tags=["baseline", name],
+                reinit=True
+            )
 
         model = SmilesTransformer(
-            vocab_size=datamodule.vocab_size, num_layers=num_layers
-        )
+                vocab_size=datamodule.vocab_size,
+                **hyperparams
+            )
 
         trainer = pl.Trainer(
-            limit_train_batches=100,
-            limit_val_batches=10,
-            max_epochs=50,
-            devices=4,
-            accelerator="cpu",
-            precision=32,
-            logger=wandb_logger,
-            fast_dev_run=False,
-        )
+                max_epochs=50,
+                log_every_n_steps=5,
+                devices=1,
+                accelerator="gpu",
+                precision=32,
+                logger=wandb_logger,
+                fast_dev_run=False,
+            )
         trainer.fit(model=model, datamodule=datamodule)
+
+        wandb_logger.experiment.finish()
+        wandb_logger.finalize('success')
