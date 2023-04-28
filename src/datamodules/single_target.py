@@ -26,7 +26,7 @@ class SingleTargetDataModule(pl.LightningDataModule):
 
 
 class SingleTargetSmilesDataModule(SingleTargetDataModule):
-    def __init__(self, target: str, data_dir: str = "../data", batch_size: int = 256):
+    def __init__(self, target: str, data_dir: str = "../data", batch_size: int = 32):
         super().__init__(target, data_dir, batch_size)
 
         smiles = "".join(list(self.df["smiles"]))
