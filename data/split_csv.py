@@ -9,7 +9,7 @@ groups = df.groupby('target')
 # Loop through each group
 for name, group in groups:
     # Extract the relevant columns
-    cols = ['smiles', 'ChEMBL_ID', 'activity', 'target', name]
+    cols = ['smiles', 'ChEMBL_ID', 'activity', name]
     sub_df = group[cols]
 
     # Rename the last column to 'binding score'

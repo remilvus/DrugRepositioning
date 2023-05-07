@@ -2,7 +2,7 @@ from sklearn import model_selection
 from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 
-from utils.data import load_datasets, SmilesDataset
+from ..utils import load_datasets, SmilesDataset
 
 
 class SingleTargetDataModule(pl.LightningDataModule):
@@ -48,21 +48,3 @@ class SingleTargetSmilesDataModule(SingleTargetDataModule):
         )
         return DataLoader(dataset, batch_size=self.batch_size)
 
-
-class SingleTargetFeaturesDataModule(SingleTargetDataModule):
-    def __init__(self, target: str, featurizer, data_dir: str = "../data", batch_size: int = 256):
-        super().__init__(target, data_dir, batch_size)
-
-        self.featurizer = featurizer
-
-    def train_dataloader(self):
-        dataset = FeaturesDataset(
-            self.df_train, self.featurizer
-        )
-        return DataLoader(dataset, batch_size=self.batch_size)
-
-    def val_dataloader(self):
-        dataset = FeaturesDataset(
-            self.df_val, self.featurizer
-        )
-        return DataLoader(dataset, batch_size=self.batch_size)

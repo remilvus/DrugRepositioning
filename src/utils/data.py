@@ -56,26 +56,6 @@ class SmilesDataset(Dataset):
         return self.tokenized_smiles[idx], self.target[idx]
 
 
-class FeaturesDataset(Dataset):
-    def __init__(self, df, featurizer):
-        self.df = df
-        self.featurizer = featurizer
-        self.prepare_items()
-
-    def prepare_items(self):
-        smiles = list(self.df["smiles"])
-        self.featurized_smiles = featurizer(smiles)
-
-        target = list(self.df["target"])
-        self.target = np.clip(0, 100, target)
-
-    def __len__(self):
-        return len(self.df)
-
-    def __getitem__(self, idx):
-        return self.featurized_smiles[idx], self.target[idx]
-
-
 if __name__ == "__main__":
     frames = load_datasets()
     for name, df in frames.items():
