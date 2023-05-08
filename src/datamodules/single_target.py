@@ -2,7 +2,7 @@ from sklearn import model_selection
 from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 
-from ..utils import load_datasets, SmilesDataset
+from src.utils import load_datasets, SmilesDataset
 
 
 class SingleTargetDataModule(pl.LightningDataModule):

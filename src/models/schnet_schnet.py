@@ -10,14 +10,14 @@ class SchnetSchnet(pl.LightningModule):
                  lr=1e-3,
                  **kwargs):
         super(SchnetSchnet, self).__init__()
-        self.save_hyperparams()
+        self.save_hyperparameters()
         self.schnet_ligand = SchNet(hidden_channels=64, num_filters=64, num_interactions=4)
         self.schnet_target = SchNet(hidden_channels=64, num_filters=64, num_interactions=4)
         self.linear = nn.Linear(2, 2)
 
     def forward(self, x):
-        target_embedding = self.schnet_target(x.ligand_features)
-        ligand_embedding = self.schnet_ligand(x.ligand_features)
+        target_embedding = self.schnet_target(x.target_features.z, x.target_features.pos, x.target_features.batch)
+        ligand_embedding = self.schnet_target(x.ligand_features.z, x.ligand_features.pos, x.ligand_features.batch)
         combined = torch.cat([target_embedding, ligand_embedding], dim=1)
         output = self.linear(combined)
         return output

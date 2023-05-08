@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 from dataclasses import dataclass
 from copy import deepcopy
 from typing import Any
-from ..featurizers.featurizer import Featurizer
+from src.featurizers.featurizer import Featurizer
 
 
 @dataclass

@@ -1,15 +1,16 @@
 from rdkit import Chem
+from rdkit.Chem import Mol
 
 
 class Featurizer:
-    def __init__(self, mol):
+    def __init__(self, mol: Mol):
         self.mol = mol
 
     def get_features(self):
         ...
 
     @staticmethod
-    def collate_fn(features):
+    def collate_fn(encodings):
         ...
 
     @classmethod

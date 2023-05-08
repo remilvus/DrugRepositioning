@@ -5,12 +5,13 @@ import torch
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 
-from ..datasets.ligand_target_activity_and_binding import LigandTargetActivityAndBinding, DataPoint, Ligand, Target
-from ..featurizers import Featurizer
+from src.datasets import LigandTargetActivityAndBinding, DataPoint, Ligand, Target
+from src.featurizers import Featurizer
+from src.huggingmolecules import RecursiveToDeviceMixin
 
 
 @dataclass
-class DataBatch:
+class DataBatch(RecursiveToDeviceMixin):
     ligand: list[Ligand]
     ligand_features: torch.FloatTensor
     target: list[Target]
