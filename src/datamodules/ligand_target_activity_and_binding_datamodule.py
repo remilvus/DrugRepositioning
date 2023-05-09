@@ -43,7 +43,7 @@ class LigandTargetActivityAndBindingDataModule(pl.LightningDataModule):
                  path: Path = Path('../data/'),
                  batch_size: int = 32,
                  test_size: float = 0.2,
-                 val_size: float = 0.0):
+                 val_size: float = 0.00001):
         super().__init__()
         self.ligand_featurizer = ligand_featurizer
         self.target_featurizer = target_featurizer

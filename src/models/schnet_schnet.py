@@ -16,14 +16,18 @@ class SchnetSchnet(pl.LightningModule):
         self.linear = nn.Linear(2, 2)
 
     def forward(self, x):
-        target_embedding = self.schnet_target(x.target_features.z, x.target_features.pos, x.target_features.batch)
-        ligand_embedding = self.schnet_target(x.ligand_features.z, x.ligand_features.pos, x.ligand_features.batch)
+        target_embedding = self.schnet_target(x.target_features.node_z,
+                                              x.target_features.node_pos,
+                                              x.target_features.batch)
+        ligand_embedding = self.schnet_target(x.ligand_features.node_z,
+                                              x.ligand_features.node_pos,
+                                              x.ligand_features.batch)
         combined = torch.cat([target_embedding, ligand_embedding], dim=1)
         output = self.linear(combined)
         return output
 
     def training_step(self, batch, batch_idx):
-        y = torch.cat([batch.activity, batch.binding_score], dim=1)
+        y = torch.cat([batch.activity.unsqueeze(1), batch.binding_score.unsqueeze(1)], dim=1)
         y_hat = self(batch)
         loss = nn.functional.mse_loss(y_hat, y)
         self.log("train_loss", loss)

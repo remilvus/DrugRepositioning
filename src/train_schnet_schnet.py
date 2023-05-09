@@ -6,14 +6,15 @@ from datamodules import LigandTargetActivityAndBindingDataModule
 from models import SchnetSchnet
 from featurizers import RMatFeaturizer, SchnetFeaturizer
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     np.random.seed(0)
     torch.random.manual_seed(0)
 
     wandb_logger = WandbLogger(
-        project="Drug Repositioning",
-        save_dir="../logs",
-        tags=["schnet_schnet"],
+        project='Drug Repositioning',
+        entity='drug_repositioning',
+        save_dir='../logs',
+        tags=['schnet_schnet'],
         reinit=True
     )
 
@@ -27,7 +28,7 @@ if __name__ == "__main__":
         max_epochs=50,
         log_every_n_steps=5,
         devices=1,
-        accelerator="auto",
+        accelerator='auto',
         precision=32,
         logger=wandb_logger,
         fast_dev_run=False,

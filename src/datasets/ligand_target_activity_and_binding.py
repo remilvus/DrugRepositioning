@@ -7,13 +7,13 @@ from typing import Any
 from src.featurizers.featurizer import Featurizer
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class Ligand:
     chembl_id: str
     smiles: str
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class Target:
     name: str
     pdb_file: Path
@@ -42,7 +42,7 @@ class LigandTargetActivityAndBinding(Dataset):
         self.target_featurizer = target_featurizer
 
         for target in targets:
-            df = pd.read_csv(target.pdb_file)
+            df = pd.read_csv(target.pdb_file.with_suffix('.csv'))
             for i in range(len(df)):
                 ligand = Ligand(df['ChEMBL_ID'].iloc[i], df['smiles'].iloc[i])
                 if ligand in ligands:
@@ -52,8 +52,8 @@ class LigandTargetActivityAndBinding(Dataset):
 
     def __getitem__(self, index):
         data_point = deepcopy(self.data[index])  # We do not want to keep features in self.data
-        data_point.ligand_features = self.ligand_featurizer.from_smiles(data_point.ligand).get_features()
-        data_point.target_features = self.target_featurizer.from_pdb(data_point.target).get_features()
+        data_point.ligand_features = self.ligand_featurizer.from_smiles(data_point.ligand.smiles).get_features()
+        data_point.target_features = self.target_featurizer.from_pdb(data_point.target.pdb_file).get_features()
         return data_point
 
     def __len__(self):
@@ -62,7 +62,7 @@ class LigandTargetActivityAndBinding(Dataset):
     @staticmethod
     def available_ligands(path):
         ligands = set()
-        for csv_file in path.glob('.csv'):
+        for csv_file in path.glob('*.csv'):
             df = pd.read_csv(csv_file)
             ligands.update({Ligand(chembl_id, smiles) for chembl_id, smiles in
                             df[['ChEMBL_ID', 'smiles']].itertuples(index=False, name=None)})
