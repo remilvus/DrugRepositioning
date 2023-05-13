@@ -7,7 +7,7 @@ from tests.models.models_base import ModelsApiTestBase, ModelsForwardTestBase
 class ModelsRMatApiTest(ModelsApiTestBase, unittest.TestCase):
     config_cls = RMatConfig
     model_cls = RMatModel
-    head_layers = ['generator']
+    head_layers = ["generator"]
 
 
 class ModelsRMatForwardTest(ModelsForwardTestBase, unittest.TestCase):

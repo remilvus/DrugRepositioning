@@ -16,7 +16,9 @@ class ConfigurationArchTestBase(AbstractTestCase):
         for pretrained_name in self.config_arch_dict.keys():
             dict_first = self.config_cls.from_pretrained(pretrained_name).to_dict()
             params = get_random_config_param(self.config_cls)
-            dict_second = self.config_cls.from_pretrained(pretrained_name, **params).to_dict()
+            dict_second = self.config_cls.from_pretrained(
+                pretrained_name, **params
+            ).to_dict()
             dict_first.update(**params)
             self.test.assertEqual(dict_first, dict_second)
 
@@ -37,9 +39,13 @@ class ModelsArchTestBase:
         for pretrained_name in self.model_arch_dict.keys():
             model = self.model_cls.from_pretrained(pretrained_name)
 
-            weights_path = get_cache_filepath(pretrained_name, self.model_arch_dict, extension='pt')
+            weights_path = get_cache_filepath(
+                pretrained_name, self.model_arch_dict, extension="pt"
+            )
 
-            pretrained_params_set = set(torch.load(weights_path, map_location='cpu').keys())
+            pretrained_params_set = set(
+                torch.load(weights_path, map_location="cpu").keys()
+            )
             model_params_set = set(model.state_dict().keys())
             excluded_params_set = set(get_excluded_params(model, self.head_layers))
 

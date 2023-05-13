@@ -7,14 +7,17 @@ import numpy as np
 from huggingmolecules.configuration.configuration_api import PretrainedConfigMixin
 from huggingmolecules.featurization.featurization_api import PretrainedFeaturizerMixin
 from tests.common.api import AbstractTestCase
-from tests.common.utils import assert_arrays_almost_equals, assert_encoding_almost_equals
+from tests.common.utils import (
+    assert_arrays_almost_equals,
+    assert_encoding_almost_equals,
+)
 
 
 class FeaturizationApiTestBase(AbstractTestCase):
     config_cls: Type[PretrainedConfigMixin]
     featurizer_cls: Type[PretrainedFeaturizerMixin]
     config_arch_dict: dict
-    smiles_list: List[str] = ['C/C=C/C', '[C]=O']
+    smiles_list: List[str] = ["C/C=C/C", "[C]=O"]
     expected_encoded_smiles: dict
     expected_batch: dict
 
@@ -31,7 +34,7 @@ class FeaturizationApiTestBase(AbstractTestCase):
     def test_from_pretrained_custom_config(self):
         config = self.config_cls.from_pretrained(self.get_random_arch_key())
         with tempfile.TemporaryDirectory() as tmp:
-            json_path = os.path.join(tmp, 'config.json')
+            json_path = os.path.join(tmp, "config.json")
             config.save(json_path)
             featurizer = self.featurizer_cls.from_pretrained(json_path)
 
@@ -41,8 +44,8 @@ class FeaturizationApiTestBase(AbstractTestCase):
         for pretrained_name in self.config_arch_dict.keys():
             featurizer = self.featurizer_cls.from_pretrained(pretrained_name)
             batch = featurizer(self.smiles_list)
-            self.test.assertTrue(hasattr(batch, 'y'))
-            self.test.assertTrue(hasattr(batch, '__len__'))
+            self.test.assertTrue(hasattr(batch, "y"))
+            self.test.assertTrue(hasattr(batch, "__len__"))
 
     def test_encode_smiles_list(self):
         for pretrained_name in self.config_arch_dict.keys():
@@ -64,8 +67,10 @@ class FeaturizationApiTestBase(AbstractTestCase):
         for pretrained_name in self.config_arch_dict.keys():
             featurizer = self.featurizer_cls.from_pretrained(pretrained_name)
             encoded = featurizer.encode_smiles_list(self.smiles_list, y_list)
-            for res, exp, y in zip(encoded, self.expected_encoded_smiles[pretrained_name], y_list):
-                assert_encoding_almost_equals(res, exp, excluded=['y'])
+            for res, exp, y in zip(
+                    encoded, self.expected_encoded_smiles[pretrained_name], y_list
+            ):
+                assert_encoding_almost_equals(res, exp, excluded=["y"])
                 self.test.assertEqual(res.y, y)
 
     def test_encode_batch_y(self):
@@ -73,18 +78,24 @@ class FeaturizationApiTestBase(AbstractTestCase):
         for pretrained_name in self.config_arch_dict.keys():
             featurizer = self.featurizer_cls.from_pretrained(pretrained_name)
             batch = featurizer(self.smiles_list, y_list)
-            assert_encoding_almost_equals(batch, self.expected_batch[pretrained_name], excluded=['y'])
+            assert_encoding_almost_equals(
+                batch, self.expected_batch[pretrained_name], excluded=["y"]
+            )
             assert_arrays_almost_equals(batch.y, np.expand_dims(np.array(y_list), 1))
 
     def test_batch_size(self):
-        smiles_list = [random.choice(self.smiles_list) for _ in range(random.randint(1, 5))]
+        smiles_list = [
+            random.choice(self.smiles_list) for _ in range(random.randint(1, 5))
+        ]
         for pretrained_name in self.config_arch_dict.keys():
             featurizer = self.featurizer_cls.from_pretrained(pretrained_name)
             batch = featurizer(smiles_list)
             self.test.assertEqual(len(batch), len(smiles_list))
 
     def test_y_size(self):
-        smiles_list = [random.choice(self.smiles_list) for _ in range(random.randint(1, 5))]
+        smiles_list = [
+            random.choice(self.smiles_list) for _ in range(random.randint(1, 5))
+        ]
         y_list = [random.random() for _ in range(len(smiles_list))]
         for pretrained_name in self.config_arch_dict.keys():
             featurizer = self.featurizer_cls.from_pretrained(pretrained_name)

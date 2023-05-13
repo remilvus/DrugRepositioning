@@ -7,7 +7,11 @@ from huggingmolecules.configuration.configuration_api import PretrainedConfigMix
 from huggingmolecules.featurization.featurization_api import PretrainedFeaturizerMixin
 from huggingmolecules.models.models_api import PretrainedModelBase
 from tests.common.api import AbstractTestCase
-from tests.common.utils import assert_dicts_almost_equals, assert_negate, get_excluded_params
+from tests.common.utils import (
+    assert_dicts_almost_equals,
+    assert_negate,
+    get_excluded_params,
+)
 
 
 class ModelsApiTestBase(AbstractTestCase):
@@ -23,7 +27,7 @@ class ModelsApiTestBase(AbstractTestCase):
 
     def test_save_and_load(self):
         with tempfile.TemporaryDirectory() as tmp:
-            weight_file_path = os.path.join(tmp, 'weight.pt')
+            weight_file_path = os.path.join(tmp, "weight.pt")
             self.model.save_weights(weight_file_path)
             assert os.path.exists(weight_file_path)
             model_second = self.model_cls(self.config)
@@ -33,52 +37,72 @@ class ModelsApiTestBase(AbstractTestCase):
 
     def test_save_excluded(self):
         with tempfile.TemporaryDirectory() as tmp:
-            weight_file_path = os.path.join(tmp, 'weight.pt')
+            weight_file_path = os.path.join(tmp, "weight.pt")
             self.model.save_weights(weight_file_path, excluded=self.head_layers)
             model_second = self.model_cls(self.config)
             model_second.load_weights(weight_file_path)
 
         excluded = self.excluded_params
-        assert_dicts_almost_equals(self.model.state_dict(), model_second.state_dict(), excluded=excluded)
-        assert_negate(lambda: assert_dicts_almost_equals(self.model.state_dict(), model_second.state_dict()))
+        assert_dicts_almost_equals(
+            self.model.state_dict(), model_second.state_dict(), excluded=excluded
+        )
+        assert_negate(
+            lambda: assert_dicts_almost_equals(
+                self.model.state_dict(), model_second.state_dict()
+            )
+        )
 
     def test_load_excluded(self):
         with tempfile.TemporaryDirectory() as tmp:
-            weight_file_path = os.path.join(tmp, 'weight.pt')
+            weight_file_path = os.path.join(tmp, "weight.pt")
             self.model.save_weights(weight_file_path)
             model_second = self.model_cls(self.config)
             model_second.load_weights(weight_file_path, excluded=self.head_layers)
 
         excluded = self.excluded_params
-        assert_dicts_almost_equals(self.model.state_dict(), model_second.state_dict(), excluded=excluded)
-        assert_negate(lambda: assert_dicts_almost_equals(self.model.state_dict(), model_second.state_dict()))
+        assert_dicts_almost_equals(
+            self.model.state_dict(), model_second.state_dict(), excluded=excluded
+        )
+        assert_negate(
+            lambda: assert_dicts_almost_equals(
+                self.model.state_dict(), model_second.state_dict()
+            )
+        )
 
     def test_from_pretrained_custom(self):
         with tempfile.TemporaryDirectory() as tmp:
-            weight_file_path = os.path.join(tmp, 'weight.pt')
+            weight_file_path = os.path.join(tmp, "weight.pt")
             self.model.save_weights(weight_file_path)
-            model_second = self.model_cls.from_pretrained(weight_file_path, config=self.config)
+            model_second = self.model_cls.from_pretrained(
+                weight_file_path, config=self.config
+            )
 
         assert_dicts_almost_equals(self.model.state_dict(), model_second.state_dict())
 
     def test_from_pretrained_custom_excluded(self):
         with tempfile.TemporaryDirectory() as tmp:
-            weight_file_path = os.path.join(tmp, 'weight.pt')
+            weight_file_path = os.path.join(tmp, "weight.pt")
             self.model.save_weights(weight_file_path)
-            model_second = self.model_cls.from_pretrained(weight_file_path,
-                                                          config=self.config,
-                                                          excluded=self.head_layers)
+            model_second = self.model_cls.from_pretrained(
+                weight_file_path, config=self.config, excluded=self.head_layers
+            )
 
         excluded = self.excluded_params
-        assert_dicts_almost_equals(self.model.state_dict(), model_second.state_dict(), excluded=excluded)
-        assert_negate(lambda: assert_dicts_almost_equals(self.model.state_dict(), model_second.state_dict()))
+        assert_dicts_almost_equals(
+            self.model.state_dict(), model_second.state_dict(), excluded=excluded
+        )
+        assert_negate(
+            lambda: assert_dicts_almost_equals(
+                self.model.state_dict(), model_second.state_dict()
+            )
+        )
 
 
 class ModelsForwardTestBase(AbstractTestCase):
     model_cls: Type[PretrainedModelBase]
     featurizer_cls: Type[PretrainedFeaturizerMixin]
     config_cls: Type[PretrainedConfigMixin]
-    smiles_list = ['C/C=C/C', '[C]=O', 'CC(=O)O', 'C1CC1']
+    smiles_list = ["C/C=C/C", "[C]=O", "CC(=O)O", "C1CC1"]
 
     def setUp(self):
         super().setUp()

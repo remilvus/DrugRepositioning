@@ -8,6 +8,6 @@ if __name__ == "__main__":
     from experiments.src.gin import parse_gin_config_files_and_bindings
 
     # Bind values to functions/methods parameters by parsing appropriate gin-config files and bindings.
-    parse_gin_config_files_and_bindings(base='train')
+    parse_gin_config_files_and_bindings(base="train")
 
     train_model()

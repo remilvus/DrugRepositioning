@@ -8,7 +8,7 @@ from tests.models.models_base import ModelsApiTestBase, ModelsForwardTestBase
 class ModelsGroverApiTest(ModelsApiTestBase, unittest.TestCase):
     config_cls = GroverConfig
     model_cls = GroverModel
-    head_layers = ['readout', 'mol_atom_from_atom_ffn', 'mol_atom_from_bond_ffn']
+    head_layers = ["readout", "mol_atom_from_atom_ffn", "mol_atom_from_bond_ffn"]
 
 
 class ModelsGroverForwardTest(ModelsForwardTestBase, unittest.TestCase):

@@ -47,4 +47,3 @@ class SingleTargetSmilesDataModule(SingleTargetDataModule):
             self.df_val, tokens=self.tokens, max_len=self.sentence_length
         )
         return DataLoader(dataset, batch_size=self.batch_size)
-

@@ -36,8 +36,11 @@ def assert_negate(assertion):
 
 
 def get_excluded_params(model, head_layers):
-    return [p for p in model.state_dict().keys()
-            if any(p.split('.')[0] == e for e in head_layers)]
+    return [
+        p
+        for p in model.state_dict().keys()
+        if any(p.split(".")[0] == e for e in head_layers)
+    ]
 
 
 def get_random_config_param(config_cls):

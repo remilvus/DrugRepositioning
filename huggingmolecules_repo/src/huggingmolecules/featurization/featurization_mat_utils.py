@@ -14,10 +14,12 @@ from rdkit.Chem.rdmolfiles import MolFromSmiles
 
 from ..featurization.featurization_common_utils import one_hot_vector
 
-T_Tensor = TypeVar('T_Tensor', bound=torch.Tensor)
+T_Tensor = TypeVar("T_Tensor", bound=torch.Tensor)
 
 
-def pad_array(array: T_Tensor, *, size: Tuple[int, ...], dtype: torch.dtype = None) -> T_Tensor:
+def pad_array(
+        array: T_Tensor, *, size: Tuple[int, ...], dtype: torch.dtype = None
+) -> T_Tensor:
     if dtype is None:
         dtype = array.dtype
     result = torch.zeros(size=size, dtype=dtype)
@@ -32,10 +34,13 @@ def pad_sequence(sequence: List[T_Tensor], dtype: torch.dtype = None) -> T_Tenso
     return torch.stack([pad_array(t, size=max_shape, dtype=dtype) for t in sequence])
 
 
-def add_dummy_node(*, node_features: np.ndarray = None,
-                   adj_matrix: np.ndarray = None,
-                   dist_matrix: np.ndarray = None,
-                   bond_features: np.ndarray = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def add_dummy_node(
+        *,
+        node_features: np.ndarray = None,
+        adj_matrix: np.ndarray = None,
+        dist_matrix: np.ndarray = None,
+        bond_features: np.ndarray = None
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     if node_features is not None:
         m = np.zeros((node_features.shape[0] + 1, node_features.shape[1] + 1))
         m[1:, 1:] = node_features
@@ -50,7 +55,13 @@ def add_dummy_node(*, node_features: np.ndarray = None,
         m[1:, 1:] = dist_matrix
         dist_matrix = m
     if bond_features is not None:
-        m = np.zeros((bond_features.shape[0], bond_features.shape[1] + 1, bond_features.shape[2] + 1))
+        m = np.zeros(
+            (
+                bond_features.shape[0],
+                bond_features.shape[1] + 1,
+                bond_features.shape[2] + 1,
+            )
+        )
         m[:, 1:, 1:] = bond_features
         bond_features = m
 
@@ -78,10 +89,14 @@ def build_atom_features_matrix(mol: Mol) -> np.ndarray:
 def get_atom_features(atom) -> np.ndarray:
     features = []
 
-    features += one_hot_vector(atom.GetAtomicNum(), [5, 6, 7, 8, 9, 15, 16, 17, 35, 53, 999])
+    features += one_hot_vector(
+        atom.GetAtomicNum(), [5, 6, 7, 8, 9, 15, 16, 17, 35, 53, 999]
+    )
     features += one_hot_vector(len(atom.GetNeighbors()), [0, 1, 2, 3, 4, 5])
     features += one_hot_vector(atom.GetTotalNumHs(), [0, 1, 2, 3, 4])
-    features += one_hot_vector(atom.GetFormalCharge(), [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5])
+    features += one_hot_vector(
+        atom.GetFormalCharge(), [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+    )
     features.append(atom.IsInRing())
     features.append(atom.GetIsAromatic())
 

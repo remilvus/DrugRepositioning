@@ -30,14 +30,18 @@ def floyd_warshall(adj: np.ndarray, inf: float = 999.0) -> np.ndarray:
     return dist
 
 
-def get_relational_array(order_matrix: np.ndarray, max_order: int = 4, inf: float = 999.0) -> np.ndarray:
+def get_relational_array(
+        order_matrix: np.ndarray, max_order: int = 4, inf: float = 999.0
+) -> np.ndarray:
     relational_mat = np.zeros((max_order + 2, *order_matrix.shape))
 
     for i in range(max_order):
         relational_mat[i][order_matrix == i] = 1
 
     relational_mat[max_order][(order_matrix >= max_order) & (order_matrix < inf)] = 1
-    relational_mat[max_order + 1][order_matrix == inf] = 1  # additional dim for dummy node
+    relational_mat[max_order + 1][
+        order_matrix == inf
+        ] = 1  # additional dim for dummy node
 
     return relational_mat
 
@@ -62,12 +66,16 @@ def build_relative_matrix(adj_matrix: np.ndarray) -> np.ndarray:
     return relative_mat
 
 
-def add_mask_feature(bond_features: np.ndarray, node_features: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def add_mask_feature(
+        bond_features: np.ndarray, node_features: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
     m = np.zeros((node_features.shape[0], node_features.shape[1] + 1))
     m[:, 1:] = node_features
     node_features = m
 
-    m = np.zeros((bond_features.shape[0] + 1, bond_features.shape[1], bond_features.shape[2]))
+    m = np.zeros(
+        (bond_features.shape[0] + 1, bond_features.shape[1], bond_features.shape[2])
+    )
     m[1:, :, :] = bond_features
     bond_features = m
 

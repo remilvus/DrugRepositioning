@@ -12,7 +12,7 @@ class MockedConfig(PretrainedConfigMixin):
     int_val: int = 10
     float_val: float = 0.1
     bool_val: bool = True
-    str_val: str = 'whatever'
+    str_val: str = "whatever"
     none_val: int = None
 
     @classmethod
@@ -27,10 +27,10 @@ class ConfigurationApiTest(ConfigurationApiTestBase, unittest.TestCase):
     def test_dict(self):
         config = self.config_cls()
         expected = {
-            'int_val': 10,
-            'float_val': 0.1,
-            'bool_val': True,
-            'str_val': 'whatever',
-            'none_val': None
+            "int_val": 10,
+            "float_val": 0.1,
+            "bool_val": True,
+            "str_val": "whatever",
+            "none_val": None,
         }
         self.test.assertEqual(config.to_dict(), expected)

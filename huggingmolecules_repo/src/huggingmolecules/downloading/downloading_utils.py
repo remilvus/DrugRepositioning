@@ -3,12 +3,12 @@ import os
 import filelock
 import gdown
 
-default_cache_dir = '~/.cache/torch/huggingmolecules/'
+default_cache_dir = "~/.cache/torch/huggingmolecules/"
 HUGGINGMOLECULES_CACHE = os.getenv("HUGGINGMOLECULES_CACHE", default_cache_dir)
 
 
 def get_cache_filepath(pretrained_name: str, archive_dict: dict, extension: str) -> str:
-    file_name = f'{pretrained_name}.{extension}'
+    file_name = f"{pretrained_name}.{extension}"
     file_path = os.path.join(HUGGINGMOLECULES_CACHE, file_name)
     return os.path.expanduser(file_path)
 

@@ -4,8 +4,8 @@ from typing import List
 from .configuration_api import PretrainedConfigMixin
 
 GROVER_CONFIG_ARCH = {
-    'grover_base': 'https://drive.google.com/uc?id=1IJUedzhWSiPDdiVPKyAhv0JAsH_xqKHz',
-    'grover_large': 'https://drive.google.com/uc?id=1T2ot3tF6aRR9jsveKB5ZEdvCOpt-D8Aj'
+    "grover_base": "https://drive.google.com/uc?id=1IJUedzhWSiPDdiVPKyAhv0JAsH_xqKHz",
+    "grover_large": "https://drive.google.com/uc?id=1T2ot3tF6aRR9jsveKB5ZEdvCOpt-D8Aj",
 }
 
 
@@ -14,12 +14,12 @@ class GroverConfig(PretrainedConfigMixin):
     d_bond: int = 14
     d_atom: int = 151
     d_model: int = 800
-    init_type: str = 'normal'
-    backbone: str = 'dualtrans'
-    activation: str = 'PReLU'
+    init_type: str = "normal"
+    backbone: str = "dualtrans"
+    activation: str = "PReLU"
     dropout: float = 0.0
 
-    encoder_output_type: str = 'both'
+    encoder_output_type: str = "both"
     encoder_n_blocks: int = 1
     encoder_n_attn_heads: int = 4
     encoder_attn_output_bias: bool = False

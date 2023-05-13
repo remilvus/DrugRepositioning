@@ -24,7 +24,7 @@ class ConfigurationApiTestBase(AbstractTestCase):
     def test_save_and_load(self):
         config_first = self.config_cls(**get_random_config_param(self.config_cls))
         with tempfile.TemporaryDirectory() as tmp:
-            json_file_path = os.path.join(tmp, 'config.json')
+            json_file_path = os.path.join(tmp, "config.json")
             config_first.save(json_file_path)
             config_second = self.config_cls.from_pretrained(json_file_path)
 

@@ -5,8 +5,15 @@ import torch
 from rdkit import Chem
 
 from .featurization_api import RecursiveToDeviceMixin, PretrainedFeaturizerMixin
-from .featurization_common_utils import stack_y, generate_additional_features, stack_generated_features
-from .featurization_grover_utils import build_atom_features, build_bond_features_and_mappings
+from .featurization_common_utils import (
+    stack_y,
+    generate_additional_features,
+    stack_generated_features,
+)
+from .featurization_grover_utils import (
+    build_atom_features,
+    build_bond_features_and_mappings,
+)
 from ..configuration import GroverConfig
 
 
@@ -41,10 +48,21 @@ class GroverBatchEncoding(RecursiveToDeviceMixin):
         return self.batch_size
 
     def get_components(self):
-        return self.f_atoms, self.f_bonds, self.a2b, self.b2a, self.b2revb, self.a_scope, self.b_scope, self.a2a
+        return (
+            self.f_atoms,
+            self.f_bonds,
+            self.a2b,
+            self.b2a,
+            self.b2revb,
+            self.a_scope,
+            self.b_scope,
+            self.a2a,
+        )
 
 
-class GroverFeaturizer(PretrainedFeaturizerMixin[GroverMoleculeEncoding, GroverBatchEncoding, GroverConfig]):
+class GroverFeaturizer(
+    PretrainedFeaturizerMixin[GroverMoleculeEncoding, GroverBatchEncoding, GroverConfig]
+):
     @classmethod
     def _get_config_cls(cls) -> Type[GroverConfig]:
         return GroverConfig
@@ -58,31 +76,45 @@ class GroverFeaturizer(PretrainedFeaturizerMixin[GroverMoleculeEncoding, GroverB
         mol = Chem.MolFromSmiles(smiles)
 
         atom_features = build_atom_features(mol)
-        bond_features, a2b, b2a, b2revb = build_bond_features_and_mappings(mol, atom_features)
-        generated_features = generate_additional_features(mol, self.config.ffn_features_generators)
+        bond_features, a2b, b2a, b2revb = build_bond_features_and_mappings(
+            mol, atom_features
+        )
+        generated_features = generate_additional_features(
+            mol, self.config.ffn_features_generators
+        )
 
-        return GroverMoleculeEncoding(f_atoms=atom_features,
-                                      f_bonds=bond_features,
-                                      a2b=a2b,
-                                      b2a=b2a,
-                                      b2revb=b2revb,
-                                      n_atoms=len(atom_features),
-                                      n_bonds=len(bond_features),
-                                      generated_features=generated_features,
-                                      y=y)
+        return GroverMoleculeEncoding(
+            f_atoms=atom_features,
+            f_bonds=bond_features,
+            a2b=a2b,
+            b2a=b2a,
+            b2revb=b2revb,
+            n_atoms=len(atom_features),
+            n_bonds=len(bond_features),
+            generated_features=generated_features,
+            y=y,
+        )
 
-    def _collate_encodings(self, encodings: List[GroverMoleculeEncoding]) -> GroverBatchEncoding:
+    def _collate_encodings(
+            self, encodings: List[GroverMoleculeEncoding]
+    ) -> GroverBatchEncoding:
         # Start n_atoms and n_bonds at 1 b/c zero padding
         n_atoms = 1  # number of atoms (start at 1 b/c need index 0 as padding)
         n_bonds = 1  # number of bonds (start at 1 b/c need index 0 as padding)
-        a_scope = []  # list of tuples indicating (start_atom_index, num_atoms) for each molecule
-        b_scope = []  # list of tuples indicating (start_bond_index, num_bonds) for each molecule
+        a_scope = (
+            []
+        )  # list of tuples indicating (start_atom_index, num_atoms) for each molecule
+        b_scope = (
+            []
+        )  # list of tuples indicating (start_bond_index, num_bonds) for each molecule
 
         # All start with zero padding so that indexing with zero padding returns zeros
         f_atoms = [[0] * self.atom_fdim]
         f_bonds = [[0] * self.bond_fdim]
         a2b = [[]]  # mapping from atom index to incoming bond indices
-        b2a = [0]  # mapping from bond index to the index of the atom the bond is coming from
+        b2a = [
+            0
+        ]  # mapping from bond index to the index of the atom the bond is coming from
         b2revb = [0]  # mapping from bond index to the index of the reverse bond
 
         for mol_graph in encodings:
@@ -106,21 +138,25 @@ class GroverFeaturizer(PretrainedFeaturizerMixin[GroverMoleculeEncoding, GroverB
 
         f_atoms = torch.FloatTensor(f_atoms)
         f_bonds = torch.FloatTensor(f_bonds)
-        a2b = torch.LongTensor([a2b[a] + [0] * (max_num_bonds - len(a2b[a])) for a in range(n_atoms)])
+        a2b = torch.LongTensor(
+            [a2b[a] + [0] * (max_num_bonds - len(a2b[a])) for a in range(n_atoms)]
+        )
         b2a = torch.LongTensor(b2a)
         b2revb = torch.LongTensor(b2revb)
         a2a = b2a[a2b]  # only needed if using atom messages
         a_scope = torch.LongTensor(a_scope)
         b_scope = torch.LongTensor(b_scope)
 
-        return GroverBatchEncoding(f_atoms=f_atoms,
-                                   f_bonds=f_bonds,
-                                   a2a=a2a,
-                                   a2b=a2b,
-                                   b2a=b2a,
-                                   b2revb=b2revb,
-                                   a_scope=a_scope,
-                                   b_scope=b_scope,
-                                   y=stack_y(encodings),
-                                   generated_features=stack_generated_features(encodings),
-                                   batch_size=len(encodings))
+        return GroverBatchEncoding(
+            f_atoms=f_atoms,
+            f_bonds=f_bonds,
+            a2a=a2a,
+            a2b=a2b,
+            b2a=b2a,
+            b2revb=b2revb,
+            a_scope=a_scope,
+            b_scope=b_scope,
+            y=stack_y(encodings),
+            generated_features=stack_generated_features(encodings),
+            batch_size=len(encodings),
+        )

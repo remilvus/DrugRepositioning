@@ -37,18 +37,22 @@ class SchnetFeaturizer(Featurizer):
         node_z = np.array(node_z, dtype=np.int64)
         node_pos = np.array(node_pos, dtype=np.float32)
 
-        return SchnetMoleculeEncoding(node_z=node_z,
-                                      node_pos=node_pos)
+        return SchnetMoleculeEncoding(node_z=node_z, node_pos=node_pos)
 
     @staticmethod
     def collate_fn(encodings):
-        node_z = torch.from_numpy(np.concatenate([encoding.node_z for encoding in encodings]))
-        node_pos = torch.from_numpy(np.concatenate([encoding.node_pos for encoding in encodings]))
+        node_z = torch.from_numpy(
+            np.concatenate([encoding.node_z for encoding in encodings])
+        )
+        node_pos = torch.from_numpy(
+            np.concatenate([encoding.node_pos for encoding in encodings])
+        )
 
         repeat_counts = [encoding.node_z.size for encoding in encodings]
-        batch = torch.from_numpy(np.repeat(np.arange(len(encodings), dtype=np.int64), repeat_counts))
+        batch = torch.from_numpy(
+            np.repeat(np.arange(len(encodings), dtype=np.int64), repeat_counts)
+        )
 
-        return SchnetBatchEncoding(node_z=node_z,
-                                   node_pos=node_pos,
-                                   batch=batch,
-                                   batch_size=len(encodings))
+        return SchnetBatchEncoding(
+            node_z=node_z, node_pos=node_pos, batch=batch, batch_size=len(encodings)
+        )

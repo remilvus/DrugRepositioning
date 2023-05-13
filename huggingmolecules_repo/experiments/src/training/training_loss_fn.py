@@ -5,10 +5,10 @@ import torch.nn as nn
 
 class GroverLoss:
     def __init__(self, dist_coff: float):
-        task_name = gin.query_parameter('task.name')
-        if task_name == 'classification':
+        task_name = gin.query_parameter("task.name")
+        if task_name == "classification":
             self.pred_loss = nn.BCEWithLogitsLoss()
-        elif task_name == 'regression':
+        elif task_name == "regression":
             self.pred_loss = nn.MSELoss()
         else:
             raise ValueError(f'Task type "{task_name}" not supported.')

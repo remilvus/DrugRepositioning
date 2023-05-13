@@ -14,19 +14,20 @@ if __name__ == "__main__":
     torch.random.manual_seed(0)
 
     configs = {
-        'lr': [1e-3, 3e-3],
-        'num_layers': [4],
-        'num_heads': [2, 16, 64],
-        'hidden_size': [256, 1024],
-        'dropout': [0.1],
-        'name': get_target_names(),
+        "lr": [1e-3, 3e-3],
+        "num_layers": [4],
+        "num_heads": [2, 16, 64],
+        "hidden_size": [256, 1024],
+        "dropout": [0.1],
+        "name": get_target_names(),
     }
-    configs = product(*[zip([name] * len(values), values)
-                       for name, values in configs.items()])
+    configs = product(
+        *[zip([name] * len(values), values) for name, values in configs.items()]
+    )
 
     for hyperparams in configs:
         hyperparams = dict(hyperparams)
-        name = hyperparams['name']
+        name = hyperparams["name"]
         print(f"Training with config:\n{hyperparams}")
         datamodule = SingleTargetSmilesDataModule(name)
 
@@ -34,24 +35,21 @@ if __name__ == "__main__":
             project="Drug Repositioning",
             save_dir="logs",
             tags=["baseline", name],
-            reinit=True
+            reinit=True,
         )
 
-        model = SmilesTransformer(
-                vocab_size=datamodule.vocab_size,
-                **hyperparams
-            )
+        model = SmilesTransformer(vocab_size=datamodule.vocab_size, **hyperparams)
 
         trainer = pl.Trainer(
-                max_epochs=50,
-                log_every_n_steps=5,
-                devices=1,
-                accelerator="gpu",
-                precision=32,
-                logger=wandb_logger,
-                fast_dev_run=False,
-            )
+            max_epochs=50,
+            log_every_n_steps=5,
+            devices=1,
+            accelerator="gpu",
+            precision=32,
+            logger=wandb_logger,
+            fast_dev_run=False,
+        )
         trainer.fit(model=model, datamodule=datamodule)
 
         wandb_logger.experiment.finish()
-        wandb_logger.finalize('success')
+        wandb_logger.finalize("success")

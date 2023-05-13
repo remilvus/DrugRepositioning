@@ -12,11 +12,9 @@ def clones(module: nn.Module, n: int):
 
 # Embeddings
 
+
 class Embedding(nn.Module):
-    def __init__(self, *,
-                 d_input: int,
-                 d_output: int,
-                 dropout: float):
+    def __init__(self, *, d_input: int, d_output: int, dropout: float):
         super(Embedding, self).__init__()
         self.lut = nn.Linear(d_input, d_output)
         self.dropout = nn.Dropout(dropout)
@@ -27,17 +25,23 @@ class Embedding(nn.Module):
 
 # Encoder
 
+
 class Encoder(nn.Module):
     """Core encoder is a stack of N layers"""
 
-    def __init__(self, *,
-                 sa_layer: nn.Module,
-                 ff_layer: nn.Module,
-                 d_model: int,
-                 dropout: float,
-                 n_layers: int):
+    def __init__(
+            self,
+            *,
+            sa_layer: nn.Module,
+            ff_layer: nn.Module,
+            d_model: int,
+            dropout: float,
+            n_layers: int,
+    ):
         super(Encoder, self).__init__()
-        layer = EncoderLayer(sa_layer=sa_layer, ff_layer=ff_layer, d_model=d_model, dropout=dropout)
+        layer = EncoderLayer(
+            sa_layer=sa_layer, ff_layer=ff_layer, d_model=d_model, dropout=dropout
+        )
         self.layers = clones(layer, n_layers)
         self.norm = nn.LayerNorm(layer.size)
 
@@ -51,15 +55,15 @@ class Encoder(nn.Module):
 class EncoderLayer(nn.Module):
     """Encoder is made up of self-attn and feed forward (defined below)"""
 
-    def __init__(self, *,
-                 sa_layer: nn.Module,
-                 ff_layer: nn.Module,
-                 d_model: int,
-                 dropout: float):
+    def __init__(
+            self, *, sa_layer: nn.Module, ff_layer: nn.Module, d_model: int, dropout: float
+    ):
         super(EncoderLayer, self).__init__()
         self.self_attn = sa_layer
         self.feed_forward = ff_layer
-        self.sublayer = clones(LambdaSublayerConnection(size=d_model, dropout=dropout), 2)
+        self.sublayer = clones(
+            LambdaSublayerConnection(size=d_model, dropout=dropout), 2
+        )
         self.size = d_model
 
     def forward(self, x: torch.Tensor, mask: torch.Tensor, **kwargs):
@@ -74,9 +78,7 @@ class LambdaSublayerConnection(nn.Module):
     Note for code simplicity the norm is first as opposed to last.
     """
 
-    def __init__(self, *,
-                 size: int,
-                 dropout: float):
+    def __init__(self, *, size: int, dropout: float):
         super(LambdaSublayerConnection, self).__init__()
         self.norm = nn.LayerNorm(size)
         self.dropout = nn.Dropout(dropout)
@@ -92,9 +94,7 @@ class SublayerConnection(nn.Module):
     Note for code simplicity the norm is first as opposed to last.
     """
 
-    def __init__(self, *,
-                 size: int,
-                 dropout: float):
+    def __init__(self, *, size: int, dropout: float):
         super(SublayerConnection, self).__init__()
         self.norm = nn.LayerNorm(size)
         self.dropout = nn.Dropout(dropout)
@@ -108,13 +108,17 @@ class SublayerConnection(nn.Module):
 
 # Attention
 
+
 class MultiHeadedAttention(nn.Module):
-    def __init__(self, *,
-                 attention: nn.Module,
-                 h: int,
-                 d_model: int,
-                 dropout: float,
-                 output_bias: bool = True):
+    def __init__(
+            self,
+            *,
+            attention: nn.Module,
+            h: int,
+            d_model: int,
+            dropout: float,
+            output_bias: bool = True,
+    ):
         super().__init__()
         assert d_model % h == 0
 
@@ -127,23 +131,29 @@ class MultiHeadedAttention(nn.Module):
         self.output_linear = nn.Linear(d_model, d_model, output_bias)
         self.attention = attention
 
-    def forward(self,
-                query: torch.Tensor,
-                key: torch.Tensor,
-                value: torch.Tensor,
-                mask: torch.Tensor = None,
-                **kwargs):
+    def forward(
+            self,
+            query: torch.Tensor,
+            key: torch.Tensor,
+            value: torch.Tensor,
+            mask: torch.Tensor = None,
+            **kwargs,
+    ):
         if mask is not None:
             mask = mask.unsqueeze(1)
 
         batch_size = query.size(0)
 
         # Do all the linear projections in batch from d_model => h x d_k
-        query, key, value = [layer(x).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
-                             for layer, x in zip(self.linear_layers, (query, key, value))]
+        query, key, value = [
+            layer(x).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
+            for layer, x in zip(self.linear_layers, (query, key, value))
+        ]
 
         # Apply attention on all the projected vectors in batch.
-        x, _ = self.attention(query, key, value, mask=mask, dropout=self.dropout, **kwargs)
+        x, _ = self.attention(
+            query, key, value, mask=mask, dropout=self.dropout, **kwargs
+        )
 
         # "Concat" using a view and apply a final linear.
         x = x.transpose(1, 2).contiguous().view(batch_size, -1, self.h * self.d_k)
@@ -153,16 +163,20 @@ class MultiHeadedAttention(nn.Module):
 
 # Feed Forward
 
+
 class PositionwiseFeedForward(nn.Module):
     """Implements FFN equation."""
 
-    def __init__(self, *,
-                 d_input: int,
-                 d_hidden: int = None,
-                 d_output: int = None,
-                 activation: str,
-                 n_layers: int,
-                 dropout: float):
+    def __init__(
+            self,
+            *,
+            d_input: int,
+            d_hidden: int = None,
+            d_output: int = None,
+            activation: str,
+            n_layers: int,
+            dropout: float,
+    ):
         super(PositionwiseFeedForward, self).__init__()
         self.n_layers = n_layers
         d_output = d_output if d_output is not None else d_input
@@ -170,9 +184,11 @@ class PositionwiseFeedForward(nn.Module):
         if n_layers == 1:
             self.linears = [nn.Linear(d_input, d_output)]
         else:
-            self.linears = [nn.Linear(d_input, d_hidden)] + \
-                           [nn.Linear(d_hidden, d_hidden) for _ in range(n_layers - 2)] + \
-                           [nn.Linear(d_hidden, d_output)]
+            self.linears = (
+                    [nn.Linear(d_input, d_hidden)]
+                    + [nn.Linear(d_hidden, d_hidden) for _ in range(n_layers - 2)]
+                    + [nn.Linear(d_hidden, d_output)]
+            )
 
         self.linears = nn.ModuleList(self.linears)
         self.dropout = clones(nn.Dropout(dropout), n_layers)
@@ -191,20 +207,24 @@ class PositionwiseFeedForward(nn.Module):
 
 # Generator
 
+
 class Generator(nn.Module):
     """Define standard linear + softmax generation step."""
 
-    def __init__(self, *,
-                 d_model: int,
-                 d_generated_features: int,
-                 aggregation_type: str,
-                 d_output: int,
-                 n_layers: int,
-                 dropout: float,
-                 attn_hidden: int = 128,
-                 attn_out: int = 4):
+    def __init__(
+            self,
+            *,
+            d_model: int,
+            d_generated_features: int,
+            aggregation_type: str,
+            d_output: int,
+            n_layers: int,
+            dropout: float,
+            attn_hidden: int = 128,
+            attn_out: int = 4,
+    ):
         super(Generator, self).__init__()
-        if aggregation_type == 'grover':
+        if aggregation_type == "grover":
             self.att_net = nn.Sequential(
                 nn.Linear(d_model, attn_hidden, bias=False),
                 nn.Tanh(),
@@ -229,17 +249,19 @@ class Generator(nn.Module):
     def forward(self, x, mask, generated_features):
         mask = mask.unsqueeze(-1).float()
         out_masked = x * mask
-        if self.aggregation_type == 'mean':
+        if self.aggregation_type == "mean":
             out_sum = out_masked.sum(dim=1)
             mask_sum = mask.sum(dim=(1))
             out_avg_pooling = out_sum / mask_sum
-        elif self.aggregation_type == 'grover':
+        elif self.aggregation_type == "grover":
             out_attn = self.att_net(out_masked)
             out_attn = out_attn.masked_fill(mask == 0, -1e9)
             out_attn = F.softmax(out_attn, dim=1)
-            out_avg_pooling = torch.matmul(torch.transpose(out_attn, -1, -2), out_masked)
+            out_avg_pooling = torch.matmul(
+                torch.transpose(out_attn, -1, -2), out_masked
+            )
             out_avg_pooling = out_avg_pooling.view(out_avg_pooling.size(0), -1)
-        elif self.aggregation_type == 'contextual':
+        elif self.aggregation_type == "contextual":
             out_avg_pooling = x
         if generated_features is not None:
             out_avg_pooling = torch.cat([out_avg_pooling, generated_features], 1)
@@ -254,17 +276,17 @@ def get_activation_function(activation: str) -> nn.Module:
     :param activation: The name of the activation function.
     :return: The activation function module.
     """
-    if activation == 'ReLU':
+    if activation == "ReLU":
         return nn.ReLU()
-    elif activation == 'LeakyReLU':
+    elif activation == "LeakyReLU":
         return nn.LeakyReLU(0.1)
-    elif activation == 'PReLU':
+    elif activation == "PReLU":
         return nn.PReLU()
-    elif activation == 'tanh':
+    elif activation == "tanh":
         return nn.Tanh()
-    elif activation == 'SELU':
+    elif activation == "SELU":
         return nn.SELU()
-    elif activation == 'ELU':
+    elif activation == "ELU":
         return nn.ELU()
     elif activation == "Linear":
         return lambda x: x

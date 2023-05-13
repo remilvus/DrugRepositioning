@@ -15,13 +15,13 @@ class PretrainedConfigMixin:
     @classmethod
     def _load_dict_from_pretrained(cls, pretrained_name: str):
         archive_dict = cls._get_archive_dict()
-        file_path = from_cache(pretrained_name, archive_dict, 'json')
+        file_path = from_cache(pretrained_name, archive_dict, "json")
         if not file_path:
             file_path = os.path.expanduser(pretrained_name)
             if not os.path.exists(file_path):
                 raise FileNotFoundError(file_path)
 
-        with open(file_path, 'r') as fp:
+        with open(file_path, "r") as fp:
             param_dict: dict = json.load(fp)
 
         return param_dict
@@ -39,5 +39,5 @@ class PretrainedConfigMixin:
         return self.__dict__
 
     def save(self, file_path: str):
-        with open(file_path, 'w') as fp:
+        with open(file_path, "w") as fp:
             json.dump(self.to_dict(), fp, indent=2)
