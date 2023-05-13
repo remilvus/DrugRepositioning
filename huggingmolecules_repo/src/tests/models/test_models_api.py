@@ -18,9 +18,8 @@ MOCKED_MODEL_ARCH = {}
 
 
 class MockedModel(PretrainedModelBase):
-
     def __init__(self, config: MockedConfig):
-        super().__init__(config,,
+        super().__init__(config)
         self.encoder = nn.Linear(10, config.d_model)
         self.decoder = nn.Linear(config.d_model, 10)
         self.generator = nn.Linear(10, 1)
@@ -44,4 +43,4 @@ class MockedModel(PretrainedModelBase):
 class ModelsApiTest(ModelsApiTestBase, unittest.TestCase):
     config_cls = MockedConfig
     model_cls = MockedModel
-    head_layers = ['generator']
+    head_layers = ["generator"]

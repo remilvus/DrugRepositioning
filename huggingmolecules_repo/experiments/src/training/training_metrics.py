@@ -14,7 +14,7 @@ class BatchWeightedLoss(Metric):
             dist_sync_on_step: bool = False,
             process_group: Optional[Any] = None,
     ):
-        super().__init__(,
+        super().__init__()
 
         self.add_state("all_loss", default=[])
         self.add_state("all_sizes", default=[])
@@ -37,7 +37,7 @@ class AUROC(Metric):
             dist_sync_on_step: bool = False,
             process_group: Optional[Any] = None,
     ):
-        super().__init__(,
+        super().__init__()
 
         self.add_state("all_preds", default=[])
         self.add_state("all_target", default=[])
@@ -52,7 +52,9 @@ class AUROC(Metric):
         try:
             return auroc(preds, target)
         except ValueError:
-            logging.warning('AUROC requires both negative and positive samples. Returning None')
+            logging.warning(
+                "AUROC requires both negative and positive samples. Returning None"
+            )
 
 
 class RMSE(Metric):
@@ -62,7 +64,7 @@ class RMSE(Metric):
             dist_sync_on_step: bool = False,
             process_group: Optional[Any] = None,
     ):
-        super().__init__(,
+        super().__init__()
 
         self.add_state("all_preds", default=[])
         self.add_state("all_target", default=[])

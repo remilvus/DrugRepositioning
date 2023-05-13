@@ -5,15 +5,22 @@ from typing import Tuple, List, Optional, Type, Any
 import numpy as np
 import torch
 
-from src.huggingmolecules_repo.configuration.configuration_api import PretrainedConfigMixin
-from src.huggingmolecules_repo.featurization.featurization_api import PretrainedFeaturizerMixin, RecursiveToDeviceMixin
+from src.huggingmolecules_repo.configuration.configuration_api import (
+    PretrainedConfigMixin,
+)
+from src.huggingmolecules_repo.featurization.featurization_api import (
+    PretrainedFeaturizerMixin,
+    RecursiveToDeviceMixin,
+)
 from src.huggingmolecules_repo.models.models_api import PretrainedModelBase
 
 try:
     import molbert
 except ImportError:
-    raise ImportError('Please install molbert from the fork https://github.com/panpiort8/MolBERT '
-                      'to use MolbertModelWrapper.')
+    raise ImportError(
+        "Please install molbert from the fork https://github.com/panpiort8/MolBERT "
+        "to use MolbertModelWrapper."
+    )
 
 
 @dataclass
@@ -36,20 +43,27 @@ class MolbertBatchEncoding(RecursiveToDeviceMixin):
         return self.batch_size
 
 
-class MolbertFeaturizer(PretrainedFeaturizerMixin[Tuple[dict, float], MolbertBatchEncoding, MolbertConfig]):
+class MolbertFeaturizer(
+    PretrainedFeaturizerMixin[Tuple[dict, float], MolbertBatchEncoding, MolbertConfig]
+):
     def _unsalt(self, smiles: str) -> str:
-        return smiles.replace('[Na+].', '').replace('.[Na+]', '')
+        return smiles.replace("[Na+].", "").replace(".[Na+]", "")
 
     def _unsalt_smiles(self, smiles_list: List[str]):
         unstalted_smiles_list = [self._unsalt(smiles) for smiles in smiles_list]
         return self.tokenizer.transform(unstalted_smiles_list)
 
     def __init__(self, config: MolbertConfig):
-        super().__init__(config,,
+        super().__init__(config)
         from molbert.utils.featurizer.molfeaturizer import SmilesIndexFeaturizer
-        self.tokenizer = SmilesIndexFeaturizer.bert_smiles_index_featurizer(config.max_size)
 
-    def _collate_encodings(self, encodings: List[Tuple[Any, Any, float]]) -> MolbertBatchEncoding:
+        self.tokenizer = SmilesIndexFeaturizer.bert_smiles_index_featurizer(
+            config.max_size
+        )
+
+    def _collate_encodings(
+            self, encodings: List[Tuple[Any, Any, float]]
+    ) -> MolbertBatchEncoding:
         features_list, valid_list, y_list = zip(*encodings)
 
         features = np.vstack(features_list)
@@ -66,12 +80,15 @@ class MolbertFeaturizer(PretrainedFeaturizerMixin[Tuple[dict, float], MolbertBat
         attention_mask = torch.tensor(np.zeros_like(features))
         attention_mask[features != 0] = 1
         type_ids = torch.zeros_like(features)
-        data = {'input_ids': features, 'attention_mask': attention_mask, 'token_type_ids': type_ids}
+        data = {
+            "input_ids": features,
+            "attention_mask": attention_mask,
+            "token_type_ids": type_ids,
+        }
 
-        return MolbertBatchEncoding(data=data,
-                                    y=valid_y,
-                                    invalid_y=invalid_y,
-                                    batch_size=len(valid_features))
+        return MolbertBatchEncoding(
+            data=data, y=valid_y, invalid_y=invalid_y, batch_size=len(valid_features)
+        )
 
     def _encode_smiles(self, smiles: str, y: Optional[float]) -> Tuple[Any, Any, float]:
         indices_array, valid = self.tokenizer.transform_single(smiles)
@@ -88,10 +105,10 @@ class MolbertModelWrapper(PretrainedModelBase[MolbertBatchEncoding, MolbertConfi
         return MolbertConfig
 
     def forward(self, batch):
-        return self.model(batch.data)['finetune']
+        return self.model(batch.data)["finetune"]
 
     def __init__(self, model, config):
-        super().__init__(config,,
+        super().__init__(config)
         self.model = model
         os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
@@ -99,10 +116,13 @@ class MolbertModelWrapper(PretrainedModelBase[MolbertBatchEncoding, MolbertConfi
         return self.model.parameters(**kwargs)
 
     @classmethod
-    def from_pretrained(cls,
-                        pretrained_name: str, *,
-                        excluded: List[str] = None,
-                        config: MolbertConfig = None) -> "MolbertModelWrapper":
+    def from_pretrained(
+            cls,
+            pretrained_name: str,
+            *,
+            excluded: List[str] = None,
+            config: MolbertConfig = None,
+    ) -> "MolbertModelWrapper":
         if not config:
             config = MolbertConfig()
 
@@ -128,11 +148,14 @@ class MolbertModelWrapper(PretrainedModelBase[MolbertBatchEncoding, MolbertConfi
 
         raw_args = raw_args_str.split(" ")
         from molbert.apps.finetune import FinetuneSmilesMolbertApp
+
         try:
             args = FinetuneSmilesMolbertApp().parse_args(args=raw_args)
             model = FinetuneSmilesMolbertApp().get_model(args)
         except FileNotFoundError as error:
             print(error)
-            raise RuntimeError('Please follow README.md from fork https://github.com/panpiort8/MolBERT '
-                               'to download the pretrained MolBERT model')
+            raise RuntimeError(
+                "Please follow README.md from fork https://github.com/panpiort8/MolBERT "
+                "to download the pretrained MolBERT model"
+            )
         return cls(model, config)

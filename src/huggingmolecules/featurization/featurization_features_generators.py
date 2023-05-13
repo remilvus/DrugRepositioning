@@ -121,7 +121,6 @@ def rdkit_2d_normalized_features_generator(mol: Molecule) -> np.ndarray:
 try:
     from descriptastorus.descriptors import rdDescriptors, rdNormalizedDescriptors
 
-
     @register_features_generator("rdkit_2d")
     def rdkit_2d_features_generator(mol: Molecule) -> np.ndarray:
         """
@@ -135,7 +134,6 @@ try:
         features = generator.process(smiles)[1:]
         features = np.nan_to_num(features, 0.0)
         return features
-
 
     @register_features_generator("rdkit_2d_normalized")
     def rdkit_2d_normalized_features_generator(mol: Molecule) -> np.ndarray:
