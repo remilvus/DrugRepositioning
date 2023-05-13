@@ -9,7 +9,7 @@ import gin
 
 
 def _append_gin_config_flags(
-        parser: argparse.ArgumentParser, base: str, dataset: str, model: str
+    parser: argparse.ArgumentParser, base: str, dataset: str, model: str
 ) -> None:
     parser.add_argument("-bs", "--base", type=str, default=base, required=base is None)
     parser.add_argument(
@@ -40,7 +40,7 @@ class __DefaultValue:
 
 
 def _append_additional_bindings_flags(
-        parser: argparse.ArgumentParser, additional_bindings_args: Dict[str, Dict[str, Any]]
+    parser: argparse.ArgumentParser, additional_bindings_args: Dict[str, Dict[str, Any]]
 ) -> None:
     for param, kwargs in additional_bindings_args.items():
         kwargs.update({"default": __DefaultValue()})
@@ -48,7 +48,7 @@ def _append_additional_bindings_flags(
 
 
 def _parse_additional_bindings_flags(
-        args: argparse.Namespace, additional_binding_args: Dict[str, Dict[str, Any]]
+    args: argparse.Namespace, additional_binding_args: Dict[str, Dict[str, Any]]
 ) -> None:
     for param in additional_binding_args.keys():
         val = getattr(args, param)

@@ -36,7 +36,7 @@ if __name__ == "__main__":
     #     logger=wandb_logger,
     #     fast_dev_run=False,
     # )
-    trainer = pl.Trainer(max_epochs=1, limit_train_batches=30, profiler="simple")
+    trainer = pl.Trainer(max_epochs=1, limit_train_batches=30, profiler="advanced")
     trainer.fit(model=model, datamodule=datamodule)
 
     wandb_logger.experiment.finish()

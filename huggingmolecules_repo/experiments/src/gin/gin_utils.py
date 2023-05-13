@@ -5,12 +5,12 @@ import gin
 
 @gin.configurable("name")
 def get_default_experiment_name(
-        prefix: str = "",
-        model_name: Optional[str] = None,
-        task_name: Optional[str] = None,
-        dataset_name: Optional[str] = None,
-        assay_name: Optional[str] = None,
-        full_name: Optional[str] = None,
+    prefix: str = "",
+    model_name: Optional[str] = None,
+    task_name: Optional[str] = None,
+    dataset_name: Optional[str] = None,
+    assay_name: Optional[str] = None,
+    full_name: Optional[str] = None,
 ) -> str:
     if full_name:
         return full_name

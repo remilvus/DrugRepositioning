@@ -31,17 +31,17 @@ class PretrainedModelBase(nn.Module, Generic[T_BatchEncoding, T_Config]):
 
     @classmethod
     def get_featurizer_cls(
-            cls,
+        cls,
     ) -> Type[PretrainedFeaturizerMixin[Any, T_BatchEncoding, T_Config]]:
         raise NotImplementedError
 
     @classmethod
     def from_pretrained(
-            cls,
-            pretrained_name: str,
-            *,
-            excluded: List[str] = None,
-            config: T_Config = None,
+        cls,
+        pretrained_name: str,
+        *,
+        excluded: List[str] = None,
+        config: T_Config = None,
     ) -> "PretrainedModelBase[T_BatchEncoding, T_Config]":
         archive_dict = cls._get_archive_dict()
         file_path = from_cache(pretrained_name, archive_dict, "pt")

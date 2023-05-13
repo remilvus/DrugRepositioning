@@ -53,14 +53,14 @@ def merge_collate_fns(ligand_collate_fn, target_collate_fn):
 
 class LigandTargetActivityAndBindingDataModule(pl.LightningDataModule):
     def __init__(
-            self,
-            ligand_featurizer: Featurizer,
-            target_featurizer: Featurizer,
-            path: Path = Path("data/"),
-            batch_size: int = 32,
-            test_size: float = 0.2,
-            val_size: float = 0.00001,
-            num_workers: int = 0,
+        self,
+        ligand_featurizer: Featurizer,
+        target_featurizer: Featurizer,
+        path: Path = Path("data/"),
+        batch_size: int = 32,
+        test_size: float = 0.2,
+        val_size: float = 0.00001,
+        num_workers: int = 0,
     ):
         super().__init__()
         self.ligand_featurizer = ligand_featurizer

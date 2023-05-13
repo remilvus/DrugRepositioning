@@ -96,7 +96,7 @@ class GroverFeaturizer(
         )
 
     def _collate_encodings(
-            self, encodings: List[GroverMoleculeEncoding]
+        self, encodings: List[GroverMoleculeEncoding]
     ) -> GroverBatchEncoding:
         # Start n_atoms and n_bonds at 1 b/c zero padding
         n_atoms = 1  # number of atoms (start at 1 b/c need index 0 as padding)

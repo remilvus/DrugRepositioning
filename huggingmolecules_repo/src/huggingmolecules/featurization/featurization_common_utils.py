@@ -9,9 +9,9 @@ from .featurization_features_generators import get_features_generator
 
 
 def one_hot_vector(
-        value: Union[float, int],
-        choices: List[Union[float, int]],
-        extra_category: bool = False,
+    value: Union[float, int],
+    choices: List[Union[float, int]],
+    extra_category: bool = False,
 ) -> List[Union[float, int]]:
     encoding = [0] * len(choices)
     if extra_category:
@@ -26,7 +26,7 @@ def stack_y(encodings: List[T_BatchEncoding]) -> Optional[torch.FloatTensor]:
 
 
 def stack_generated_features(
-        encodings: List[T_BatchEncoding],
+    encodings: List[T_BatchEncoding],
 ) -> Optional[torch.FloatTensor]:
     if encodings[0].generated_features is not None:
         return torch.stack(
@@ -44,7 +44,7 @@ def stack_y_list(y_list: List[float]) -> Optional[torch.FloatTensor]:
 
 
 def generate_additional_features(
-        mol: Chem.Mol, features_generators: List[str]
+    mol: Chem.Mol, features_generators: List[str]
 ) -> List[float]:
     if features_generators is None:
         return None

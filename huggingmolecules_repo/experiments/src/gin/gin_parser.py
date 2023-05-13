@@ -28,11 +28,11 @@ ADDITIONAL_BINDINGS_ARGS = {
 
 
 def parse_gin_config_files_and_bindings(
-        *,
-        base: str = None,
-        dataset: str = None,
-        model: str = None,
-        parser: Optional[argparse.ArgumentParser] = None
+    *,
+    base: str = None,
+    dataset: str = None,
+    model: str = None,
+    parser: Optional[argparse.ArgumentParser] = None
 ) -> argparse.Namespace:
     if not parser:
         parser = argparse.ArgumentParser()

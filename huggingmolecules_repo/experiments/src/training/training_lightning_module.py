@@ -14,12 +14,12 @@ from src.huggingmolecules_repo.models.models_api import PretrainedModelBase
 
 class TrainingModule(pl.LightningModule):
     def __init__(
-            self,
-            model: PretrainedModelBase,
-            *,
-            loss_fn: Callable[[Tensor, Tensor], Tensor],
-            optimizer: torch.optim.Optimizer,
-            metric_cls: Type[Metric],
+        self,
+        model: PretrainedModelBase,
+        *,
+        loss_fn: Callable[[Tensor, Tensor], Tensor],
+        optimizer: torch.optim.Optimizer,
+        metric_cls: Type[Metric],
     ):
         super().__init__()
         self.model = model
@@ -40,7 +40,7 @@ class TrainingModule(pl.LightningModule):
         return self.model.forward(batch)
 
     def _step(
-            self, mode: str, batch: BatchEncodingProtocol, batch_idx: int
+        self, mode: str, batch: BatchEncodingProtocol, batch_idx: int
     ) -> torch.Tensor:
         output = self.forward(batch)
         loss = self.loss_fn(output, batch.y)
@@ -68,12 +68,12 @@ class TrainingModule(pl.LightningModule):
         self.metric["train"].reset()
 
     def training_step(
-            self, batch: BatchEncodingProtocol, batch_idx: int
+        self, batch: BatchEncodingProtocol, batch_idx: int
     ) -> torch.Tensor:
         return self._step("train", batch, batch_idx)
 
     def validation_step(
-            self, batch: BatchEncodingProtocol, batch_idx: int
+        self, batch: BatchEncodingProtocol, batch_idx: int
     ) -> torch.Tensor:
         return self._step("valid", batch, batch_idx)
 

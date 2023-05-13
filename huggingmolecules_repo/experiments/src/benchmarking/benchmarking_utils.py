@@ -39,7 +39,7 @@ def create_grid_results_dict() -> GridResultDict:
 
 
 def fetch_grid_results_dict_from_neptune(
-        results_dict: GridResultDict, study_name: str
+    results_dict: GridResultDict, study_name: str
 ) -> None:
     import neptune
 
@@ -76,7 +76,7 @@ def download_dataframe_from_neptune(neptune_project, name: str) -> pd.DataFrame:
 
 
 def download_results_from_neptune(
-        neptune_project, id: str, artifact_name: str
+    neptune_project, id: str, artifact_name: str
 ) -> Dict[str, float]:
     try:
         with tempfile.TemporaryDirectory() as tmp:
@@ -91,7 +91,7 @@ def download_results_from_neptune(
 
 
 def fetch_grid_results_dict_from_local(
-        grid_results_dict: GridResultDict, study_name: str
+    grid_results_dict: GridResultDict, study_name: str
 ) -> None:
     root_path = gin.query_parameter("optuna.root_path")
     save_path = os.path.join(root_path, study_name)
@@ -160,7 +160,7 @@ def _get_params_product_list(params_dict: Dict[str, Any]) -> List[dict]:
 
 
 def compute_result(
-        grid_results_dict: GridResultDict,
+    grid_results_dict: GridResultDict,
 ) -> Tuple[frozenset, Dict[str, float], str]:
     metric_cls = get_metric_cls()
     metric_name = metric_cls.__name__.lower()

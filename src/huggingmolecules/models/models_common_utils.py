@@ -30,13 +30,13 @@ class Encoder(nn.Module):
     """Core encoder is a stack of N layers"""
 
     def __init__(
-            self,
-            *,
-            sa_layer: nn.Module,
-            ff_layer: nn.Module,
-            d_model: int,
-            dropout: float,
-            n_layers: int,
+        self,
+        *,
+        sa_layer: nn.Module,
+        ff_layer: nn.Module,
+        d_model: int,
+        dropout: float,
+        n_layers: int,
     ):
         super(Encoder, self).__init__()
         layer = EncoderLayer(
@@ -56,7 +56,7 @@ class EncoderLayer(nn.Module):
     """Encoder is made up of self-attn and feed forward (defined below)"""
 
     def __init__(
-            self, *, sa_layer: nn.Module, ff_layer: nn.Module, d_model: int, dropout: float
+        self, *, sa_layer: nn.Module, ff_layer: nn.Module, d_model: int, dropout: float
     ):
         super(EncoderLayer, self).__init__()
         self.self_attn = sa_layer
@@ -111,13 +111,13 @@ class SublayerConnection(nn.Module):
 
 class MultiHeadedAttention(nn.Module):
     def __init__(
-            self,
-            *,
-            attention: nn.Module,
-            h: int,
-            d_model: int,
-            dropout: float,
-            output_bias: bool = True,
+        self,
+        *,
+        attention: nn.Module,
+        h: int,
+        d_model: int,
+        dropout: float,
+        output_bias: bool = True,
     ):
         super().__init__()
         assert d_model % h == 0
@@ -132,12 +132,12 @@ class MultiHeadedAttention(nn.Module):
         self.attention = attention
 
     def forward(
-            self,
-            query: torch.Tensor,
-            key: torch.Tensor,
-            value: torch.Tensor,
-            mask: torch.Tensor = None,
-            **kwargs,
+        self,
+        query: torch.Tensor,
+        key: torch.Tensor,
+        value: torch.Tensor,
+        mask: torch.Tensor = None,
+        **kwargs,
     ):
         if mask is not None:
             mask = mask.unsqueeze(1)
@@ -168,14 +168,14 @@ class PositionwiseFeedForward(nn.Module):
     """Implements FFN equation."""
 
     def __init__(
-            self,
-            *,
-            d_input: int,
-            d_hidden: int = None,
-            d_output: int = None,
-            activation: str,
-            n_layers: int,
-            dropout: float,
+        self,
+        *,
+        d_input: int,
+        d_hidden: int = None,
+        d_output: int = None,
+        activation: str,
+        n_layers: int,
+        dropout: float,
     ):
         super(PositionwiseFeedForward, self).__init__()
         self.n_layers = n_layers
@@ -185,9 +185,9 @@ class PositionwiseFeedForward(nn.Module):
             self.linears = [nn.Linear(d_input, d_output)]
         else:
             self.linears = (
-                    [nn.Linear(d_input, d_hidden)]
-                    + [nn.Linear(d_hidden, d_hidden) for _ in range(n_layers - 2)]
-                    + [nn.Linear(d_hidden, d_output)]
+                [nn.Linear(d_input, d_hidden)]
+                + [nn.Linear(d_hidden, d_hidden) for _ in range(n_layers - 2)]
+                + [nn.Linear(d_hidden, d_output)]
             )
 
         self.linears = nn.ModuleList(self.linears)
@@ -212,16 +212,16 @@ class Generator(nn.Module):
     """Define standard linear + softmax generation step."""
 
     def __init__(
-            self,
-            *,
-            d_model: int,
-            d_generated_features: int,
-            aggregation_type: str,
-            d_output: int,
-            n_layers: int,
-            dropout: float,
-            attn_hidden: int = 128,
-            attn_out: int = 4,
+        self,
+        *,
+        d_model: int,
+        d_generated_features: int,
+        aggregation_type: str,
+        d_output: int,
+        n_layers: int,
+        dropout: float,
+        attn_hidden: int = 128,
+        attn_out: int = 4,
     ):
         super(Generator, self).__init__()
         if aggregation_type == "grover":

@@ -75,7 +75,7 @@ class MatFeaturizer(
         )
 
     def _collate_encodings(
-            self, encodings: List[MatMoleculeEncoding]
+        self, encodings: List[MatMoleculeEncoding]
     ) -> MatBatchEncoding:
         node_features = pad_sequence(
             [torch.tensor(e.node_features).float() for e in encodings]

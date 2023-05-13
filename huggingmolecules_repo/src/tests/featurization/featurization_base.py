@@ -68,7 +68,7 @@ class FeaturizationApiTestBase(AbstractTestCase):
             featurizer = self.featurizer_cls.from_pretrained(pretrained_name)
             encoded = featurizer.encode_smiles_list(self.smiles_list, y_list)
             for res, exp, y in zip(
-                    encoded, self.expected_encoded_smiles[pretrained_name], y_list
+                encoded, self.expected_encoded_smiles[pretrained_name], y_list
             ):
                 assert_encoding_almost_equals(res, exp, excluded=["y"])
                 self.test.assertEqual(res.y, y)

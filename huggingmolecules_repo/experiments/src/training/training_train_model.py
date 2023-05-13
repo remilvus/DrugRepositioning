@@ -16,20 +16,20 @@ from ..gin.gin_utils import get_default_experiment_name
 
 @gin.configurable("train", denylist=["model", "featurizer"])
 def train_model(
-        *,
-        model: Optional[PretrainedModelBase] = None,
-        featurizer: Optional[PretrainedFeaturizerMixin] = None,
-        root_path: str,
-        num_epochs: int,
-        gpus: List[int],
-        resume: bool = False,
-        save_checkpoints: bool = True,
-        use_neptune: bool = False,
-        evaluate: bool = True,
-        custom_callbacks: Optional[List[str]] = None,
-        batch_size: int,
-        num_workers: int = 0,
-        cache_encodings: bool = True,
+    *,
+    model: Optional[PretrainedModelBase] = None,
+    featurizer: Optional[PretrainedFeaturizerMixin] = None,
+    root_path: str,
+    num_epochs: int,
+    gpus: List[int],
+    resume: bool = False,
+    save_checkpoints: bool = True,
+    use_neptune: bool = False,
+    evaluate: bool = True,
+    custom_callbacks: Optional[List[str]] = None,
+    batch_size: int,
+    num_workers: int = 0,
+    cache_encodings: bool = True,
 ):
     if not model:
         gin_model = GinModel()

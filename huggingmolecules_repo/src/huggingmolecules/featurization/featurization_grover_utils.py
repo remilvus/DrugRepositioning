@@ -11,12 +11,12 @@ from .featurization_common_utils import one_hot_vector
 
 
 def get_atom_features(
-        atom: Chem.rdchem.Atom,
-        hydrogen_acceptor_match,
-        hydrogen_donor_match,
-        acidic_match,
-        basic_match,
-        ring_info,
+    atom: Chem.rdchem.Atom,
+    hydrogen_acceptor_match,
+    hydrogen_donor_match,
+    acidic_match,
+    basic_match,
+    ring_info,
 ) -> List[Union[bool, int, float]]:
     features = []
 
@@ -110,7 +110,7 @@ def build_atom_features(mol: Chem.Mol) -> List[Any]:
 
 
 def build_bond_features_and_mappings(
-        mol: Chem.Mol, f_atoms: List
+    mol: Chem.Mol, f_atoms: List
 ) -> Tuple[list, list, list, list]:
     f_bonds = []
     a2b = [

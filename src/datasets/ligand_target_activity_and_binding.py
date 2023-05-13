@@ -33,11 +33,11 @@ class DataPoint:
 
 class LigandTargetActivityAndBinding(Dataset):
     def __init__(
-            self,
-            ligands: set,
-            targets: set,
-            ligand_featurizer: Featurizer,
-            target_featurizer: Featurizer,
+        self,
+        ligands: set,
+        targets: set,
+        ligand_featurizer: Featurizer,
+        target_featurizer: Featurizer,
     ):
         self.data = []
         self.ligands = {}
@@ -63,10 +63,12 @@ class LigandTargetActivityAndBinding(Dataset):
         data_point.ligand_features = self.ligand_featurizer.from_smiles(
             data_point.ligand.smiles
         ).get_features()
-        data_point.target_features = self.ligand_featurizer.from_smiles(
-            data_point.ligand.smiles
+        # data_point.target_features = self.ligand_featurizer.from_smiles(
+        #     data_point.ligand.smiles
+        # ).get_features()
+        data_point.target_features = self.target_featurizer.from_pdb(
+            data_point.target.pdb_file
         ).get_features()
-        # data_point.target_features = self.target_featurizer.from_pdb(data_point.target.pdb_file).get_features()
         return data_point
 
     def __len__(self):
@@ -81,8 +83,8 @@ class LigandTargetActivityAndBinding(Dataset):
                 {
                     Ligand(chembl_id, smiles)
                     for chembl_id, smiles in df[["ChEMBL_ID", "smiles"]].itertuples(
-                    index=False, name=None
-                )
+                        index=False, name=None
+                    )
                 }
             )
         return ligands

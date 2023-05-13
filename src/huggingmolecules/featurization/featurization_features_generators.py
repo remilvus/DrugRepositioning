@@ -19,7 +19,7 @@ FEATURES_GENERATOR_REGISTRY = {}
 
 
 def register_features_generator(
-        features_generator_name: str,
+    features_generator_name: str,
 ) -> Callable[[FeaturesGenerator], FeaturesGenerator]:
     """
     Creates a decorator which registers a features generator in a global dictionary to enable access by name.
@@ -62,7 +62,7 @@ MORGAN_NUM_BITS = 2048
 
 @register_features_generator("morgan")
 def morgan_binary_features_generator(
-        mol: Molecule, radius: int = MORGAN_RADIUS, num_bits: int = MORGAN_NUM_BITS
+    mol: Molecule, radius: int = MORGAN_RADIUS, num_bits: int = MORGAN_NUM_BITS
 ) -> np.ndarray:
     """
     Generates a binary Morgan fingerprint for a molecule.
@@ -82,7 +82,7 @@ def morgan_binary_features_generator(
 
 @register_features_generator("morgan_count")
 def morgan_counts_features_generator(
-        mol: Molecule, radius: int = MORGAN_RADIUS, num_bits: int = MORGAN_NUM_BITS
+    mol: Molecule, radius: int = MORGAN_RADIUS, num_bits: int = MORGAN_NUM_BITS
 ) -> np.ndarray:
     """
     Generates a counts-based Morgan fingerprint for a molecule.

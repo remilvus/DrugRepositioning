@@ -89,7 +89,7 @@ class RMatFeaturizer(
         )
 
     def _collate_encodings(
-            self, encodings: List[RMatMoleculeEncoding]
+        self, encodings: List[RMatMoleculeEncoding]
     ) -> RMatBatchEncoding:
         node_features = pad_sequence(
             [torch.tensor(e.node_features).float() for e in encodings]

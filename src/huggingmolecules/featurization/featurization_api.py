@@ -26,14 +26,14 @@ class PretrainedFeaturizerMixin(Generic[T_MoleculeEncoding, T_BatchEncoding, T_C
         self.config = config
 
     def __call__(
-            self, smiles_list: List[str], y_list: Optional[List[float]] = None
+        self, smiles_list: List[str], y_list: Optional[List[float]] = None
     ) -> T_BatchEncoding:
         encodings = self.encode_smiles_list(smiles_list, y_list)
         batch = self._collate_encodings(encodings)
         return batch
 
     def encode_smiles_list(
-            self, smiles_list: List[str], y_list: Optional[List[float]] = None
+        self, smiles_list: List[str], y_list: Optional[List[float]] = None
     ) -> List[T_MoleculeEncoding]:
         encodings = []
         if y_list is not None:
@@ -44,12 +44,12 @@ class PretrainedFeaturizerMixin(Generic[T_MoleculeEncoding, T_BatchEncoding, T_C
         return encodings
 
     def get_data_loader(
-            self,
-            dataset: List[T_MoleculeEncoding],
-            *,
-            batch_size: int,
-            shuffle: bool = False,
-            num_workers: int = 0
+        self,
+        dataset: List[T_MoleculeEncoding],
+        *,
+        batch_size: int,
+        shuffle: bool = False,
+        num_workers: int = 0
     ) -> DataLoader:
         return DataLoader(
             dataset,
@@ -63,7 +63,7 @@ class PretrainedFeaturizerMixin(Generic[T_MoleculeEncoding, T_BatchEncoding, T_C
         raise NotImplementedError
 
     def _collate_encodings(
-            self, encodings: List[T_MoleculeEncoding]
+        self, encodings: List[T_MoleculeEncoding]
     ) -> T_BatchEncoding:
         raise NotImplementedError
 
@@ -73,7 +73,7 @@ class PretrainedFeaturizerMixin(Generic[T_MoleculeEncoding, T_BatchEncoding, T_C
 
     @classmethod
     def from_pretrained(
-            cls, pretrained_name: str
+        cls, pretrained_name: str
     ) -> "PretrainedFeaturizerMixin(Generic[T_MoleculeEncoding, T_BatchEncoding, T_Config])":
         config_cls = cls._get_config_cls()
         config = config_cls.from_pretrained(pretrained_name)

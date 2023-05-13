@@ -110,7 +110,7 @@ def get_custom_callbacks(callbacks_names: List[str] = None) -> List[Callback]:
 
 @gin.configurable("loss_fn")
 def get_loss_fn(
-        *, name, **kwargs
+    *, name, **kwargs
 ) -> Callable[[torch.Tensor, torch.Tensor], torch.Tensor]:
     try:
         loss_cls = getattr(custom_loss_fn_module, name)
@@ -152,12 +152,12 @@ def get_all_hyperparams(model: PretrainedModelBase) -> Dict[str, Any]:
 
 @gin.configurable("neptune", denylist=["model", "experiment_name"])
 def get_neptune_logger(
-        model: PretrainedModelBase,
-        *,
-        user_name: str,
-        project_name: str,
-        experiment_name: str,
-        description: str,
+    model: PretrainedModelBase,
+    *,
+    user_name: str,
+    project_name: str,
+    experiment_name: str,
+    description: str,
 ):
     from pytorch_lightning.loggers import NeptuneLogger
 
@@ -183,14 +183,14 @@ def apply_neptune_logger(neptune_logger, callbacks, loggers):
 
 
 def get_data_loaders(
-        featurizer: PretrainedFeaturizerMixin,
-        *,
-        batch_size: int,
-        num_workers: int = 0,
-        cache_encodings: bool = False,
-        task_name: str = None,
-        dataset_name: str = None,
-        **kwargs,
+    featurizer: PretrainedFeaturizerMixin,
+    *,
+    batch_size: int,
+    num_workers: int = 0,
+    cache_encodings: bool = False,
+    task_name: str = None,
+    dataset_name: str = None,
+    **kwargs,
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
     if task_name and dataset_name:
         split = get_data_split(task_name=task_name, dataset_name=dataset_name, **kwargs)
@@ -240,14 +240,14 @@ def get_data_loaders(
 
 @gin.configurable("data")
 def get_data_split(
-        task_name: str,
-        dataset_name: str,
-        assay_name: str = None,
-        split_method: str = "random",
-        split_frac: Tuple[float, float, float] = (0.8, 0.1, 0.1),
-        split_seed: Union[int, str] = None,
-        normalize_labels: bool = False,
-        dataset_path: str = None,
+    task_name: str,
+    dataset_name: str,
+    assay_name: str = None,
+    split_method: str = "random",
+    split_frac: Tuple[float, float, float] = (0.8, 0.1, 0.1),
+    split_seed: Union[int, str] = None,
+    normalize_labels: bool = False,
+    dataset_path: str = None,
 ) -> dict:
     if dataset_path is None:
         split = _get_data_split_from_tdc(
@@ -265,12 +265,12 @@ def get_data_split(
 
 
 def _get_data_split_from_tdc(
-        task_name: str,
-        dataset_name: str,
-        assay_name: str,
-        split_method: str,
-        split_frac: Tuple[float, float, float],
-        split_seed: int,
+    task_name: str,
+    dataset_name: str,
+    assay_name: str,
+    split_method: str,
+    split_frac: Tuple[float, float, float],
+    split_seed: int,
 ) -> Split:
     import tdc.single_pred
 
@@ -298,12 +298,12 @@ def _get_data_split_from_tdc(
 
 
 def _get_data_split_from_csv(
-        dataset_name: str,
-        assay_name: str,
-        dataset_path: str,
-        split_method: str,
-        split_frac: Tuple[float, float, float],
-        split_seed: int,
+    dataset_name: str,
+    assay_name: str,
+    dataset_path: str,
+    split_method: str,
+    split_frac: Tuple[float, float, float],
+    split_seed: int,
 ) -> Split:
     csv_path = os.path.join(dataset_path, f"{dataset_name.lower()}.csv")
     data = pd.read_csv(csv_path)
@@ -419,7 +419,7 @@ def _dump_encodings_to_cache(split: Split) -> None:
 
 
 def evaluate_and_save_results(
-        trainer: pl.Trainer, test_loader: DataLoader, results_path: str
+    trainer: pl.Trainer, test_loader: DataLoader, results_path: str
 ) -> None:
     results = trainer.test(test_dataloaders=test_loader, ckpt_path=None)
     logging.info(results)

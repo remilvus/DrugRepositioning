@@ -62,7 +62,7 @@ class MolbertFeaturizer(
         )
 
     def _collate_encodings(
-            self, encodings: List[Tuple[Any, Any, float]]
+        self, encodings: List[Tuple[Any, Any, float]]
     ) -> MolbertBatchEncoding:
         features_list, valid_list, y_list = zip(*encodings)
 
@@ -117,11 +117,11 @@ class MolbertModelWrapper(PretrainedModelBase[MolbertBatchEncoding, MolbertConfi
 
     @classmethod
     def from_pretrained(
-            cls,
-            pretrained_name: str,
-            *,
-            excluded: List[str] = None,
-            config: MolbertConfig = None,
+        cls,
+        pretrained_name: str,
+        *,
+        excluded: List[str] = None,
+        config: MolbertConfig = None,
     ) -> "MolbertModelWrapper":
         if not config:
             config = MolbertConfig()

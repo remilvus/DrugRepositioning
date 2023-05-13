@@ -187,20 +187,20 @@ class GroverEncoderWrapper(nn.Module):
 
 class GroverEncoder(nn.Module):
     def __init__(
-            self,
-            config: GroverConfig,
-            hidden_size,
-            edge_fdim,
-            node_fdim,
-            dropout=0.0,
-            activation="ReLU",
-            num_mt_block=1,
-            num_attn_head=4,
-            atom_emb_output: Union[
-                bool, str
-            ] = False,  # options: True, False, None, "atom", "bond", "both"
-            bias=False,
-            res_connection=False,
+        self,
+        config: GroverConfig,
+        hidden_size,
+        edge_fdim,
+        node_fdim,
+        dropout=0.0,
+        activation="ReLU",
+        num_mt_block=1,
+        num_attn_head=4,
+        atom_emb_output: Union[
+            bool, str
+        ] = False,  # options: True, False, None, "atom", "bond", "both"
+        bias=False,
+        res_connection=False,
     ):
         """
 
@@ -331,7 +331,7 @@ class GroverEncoder(nn.Module):
         self.dropout_layer = nn.Dropout(p=config.dropout)
 
     def pointwise_feed_forward_to_atom_embedding(
-            self, emb_output, atom_fea, index, ffn_layer
+        self, emb_output, atom_fea, index, ffn_layer
     ):
         """
         The point-wise feed forward and long-range residual connection for atom view.
@@ -347,7 +347,7 @@ class GroverEncoder(nn.Module):
         return ffn_layer(aggr_outputx), aggr_output
 
     def pointwise_feed_forward_to_bond_embedding(
-            self, emb_output, bond_fea, a2nei, b2revb, ffn_layer
+        self, emb_output, bond_fea, a2nei, b2revb, ffn_layer
     ):
         """
         The point-wise feed forward and long-range residual connection for bond view.
@@ -377,16 +377,16 @@ class GroverEncoder(nn.Module):
         return aggr_message - rev_message
 
     def atom_bond_transform(
-            self,
-            to_atom=True,  # False: to bond
-            atomwise_input=None,
-            bondwise_input=None,
-            original_f_atoms=None,
-            original_f_bonds=None,
-            a2a=None,
-            a2b=None,
-            b2a=None,
-            b2revb=None,
+        self,
+        to_atom=True,  # False: to bond
+        atomwise_input=None,
+        bondwise_input=None,
+        original_f_atoms=None,
+        original_f_bonds=None,
+        a2a=None,
+        a2b=None,
+        b2a=None,
+        b2revb=None,
     ):
         """
         Transfer the output of atom/bond multi-head attention to the final atom/bond output.
@@ -530,21 +530,21 @@ class MPNEncoder(nn.Module):
     """A message passing neural network for encoding a molecule."""
 
     def __init__(
-            self,
-            config: GroverConfig,
-            atom_messages: bool,
-            init_message_dim: int,
-            attached_fea_fdim: int,
-            hidden_size: int,
-            bias: bool,
-            depth: int,
-            dropout: float,
-            undirected: bool,
-            dense: bool,
-            aggregate_to_atom: bool,
-            attach_fea: bool,
-            input_layer="fc",
-            dynamic_depth="none",
+        self,
+        config: GroverConfig,
+        atom_messages: bool,
+        init_message_dim: int,
+        attached_fea_fdim: int,
+        hidden_size: int,
+        bias: bool,
+        depth: int,
+        dropout: float,
+        undirected: bool,
+        dense: bool,
+        aggregate_to_atom: bool,
+        attach_fea: bool,
+        input_layer="fc",
+        dynamic_depth="none",
     ):
         """
         Initializes the MPNEncoder.
@@ -597,14 +597,14 @@ class MPNEncoder(nn.Module):
         self.W_h = nn.Linear(w_h_input_size, self.hidden_size, bias=self.bias)
 
     def forward(
-            self,
-            init_messages,
-            init_attached_features,
-            a2nei,
-            a2attached,
-            b2a=None,
-            b2revb=None,
-            adjs=None,
+        self,
+        init_messages,
+        init_attached_features,
+        a2nei,
+        a2attached,
+        b2a=None,
+        b2revb=None,
+        adjs=None,
     ) -> torch.FloatTensor:
         """
         The forward function.
@@ -698,16 +698,16 @@ class MTBlock(nn.Module):
     """
 
     def __init__(
-            self,
-            config: GroverConfig,
-            num_attn_head,
-            input_dim,
-            hidden_size,
-            activation="ReLU",
-            dropout=0.0,
-            bias=True,
-            atom_messages=False,
-            res_connection=False,
+        self,
+        config: GroverConfig,
+        num_attn_head,
+        input_dim,
+        hidden_size,
+        activation="ReLU",
+        dropout=0.0,
+        bias=True,
+        atom_messages=False,
+        res_connection=False,
     ):
         """
 
@@ -966,11 +966,11 @@ class Readout(nn.Module):
     """The readout function. Convert the node embeddings to the graph embeddings."""
 
     def __init__(
-            self,
-            rtype: str = "none",
-            hidden_size: int = 0,
-            attn_hidden: int = None,
-            attn_out: int = None,
+        self,
+        rtype: str = "none",
+        hidden_size: int = 0,
+        attn_hidden: int = None,
+        attn_out: int = None,
     ):
         """
         The readout function.

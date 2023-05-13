@@ -26,7 +26,7 @@ class LRSchedulerBase(NeptuneCompatibleCallback):
     def on_train_start(self, trainer, pl_module):
         self.base_lr = trainer.optimizers[0].param_groups[0]["lr"]
         self.total_steps = (
-                len(pl_module.train_dataloader.dataloader) * trainer.max_epochs
+            len(pl_module.train_dataloader.dataloader) * trainer.max_epochs
         )
 
         logging.info(f"Set base_lr to: {self.base_lr}")
@@ -36,7 +36,7 @@ class LRSchedulerBase(NeptuneCompatibleCallback):
         raise NotImplementedError
 
     def on_train_batch_start(
-            self, trainer, pl_module, batch, batch_idx, dataloader_idx
+        self, trainer, pl_module, batch, batch_idx, dataloader_idx
     ):
         step = trainer.global_step
         for i, group in enumerate(trainer.optimizers[0].param_groups):
@@ -62,19 +62,19 @@ class NoamLRScheduler(LRSchedulerBase):
     def get_lr(self, step):
         step += 1
         return (
-                self.base_lr
-                * 100
-                * (
-                        self.model_size ** (-0.5)
-                        * min(step ** (-0.5), step * (1e-6 + self.warmup_steps) ** (-1.5))
-                )
+            self.base_lr
+            * 100
+            * (
+                self.model_size ** (-0.5)
+                * min(step ** (-0.5), step * (1e-6 + self.warmup_steps) ** (-1.5))
+            )
         )
 
 
 @gin.configurable
 class EnhancedNoamLRScheduler(LRSchedulerBase):
     def __init__(
-            self, warmup_factor: int, init_lr_ratio: float = 10, final_lr_ratio: float = 6
+        self, warmup_factor: int, init_lr_ratio: float = 10, final_lr_ratio: float = 6
     ):
         super().__init__()
         self.warmup_factor = warmup_factor
@@ -93,7 +93,7 @@ class EnhancedNoamLRScheduler(LRSchedulerBase):
         self.final_lr = self.base_lr / self.final_lr_ratio
         self.linear_increment = (self.base_lr - self.init_lr) / self.warmup_steps
         self.exp_gamma = (self.final_lr / self.base_lr) ** (
-                1 / (self.total_steps - self.warmup_steps)
+            1 / (self.total_steps - self.warmup_steps)
         )
 
     def get_lr(self, step):
@@ -105,9 +105,9 @@ class EnhancedNoamLRScheduler(LRSchedulerBase):
 
 class GinConfigSaver(NeptuneCompatibleCallback):
     def __init__(
-            self,
-            target_name: str = "gin-config-all.txt",
-            excluded_namespaces: List[str] = None,
+        self,
+        target_name: str = "gin-config-all.txt",
+        excluded_namespaces: List[str] = None,
     ):
         super().__init__()
         self.target_name = target_name

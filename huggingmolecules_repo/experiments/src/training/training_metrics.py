@@ -9,10 +9,10 @@ from pytorch_lightning.metrics.functional.classification import auroc
 
 class BatchWeightedLoss(Metric):
     def __init__(
-            self,
-            compute_on_step: bool = False,
-            dist_sync_on_step: bool = False,
-            process_group: Optional[Any] = None,
+        self,
+        compute_on_step: bool = False,
+        dist_sync_on_step: bool = False,
+        process_group: Optional[Any] = None,
     ):
         super().__init__()
 
@@ -32,10 +32,10 @@ class BatchWeightedLoss(Metric):
 
 class AUROC(Metric):
     def __init__(
-            self,
-            compute_on_step: bool = False,
-            dist_sync_on_step: bool = False,
-            process_group: Optional[Any] = None,
+        self,
+        compute_on_step: bool = False,
+        dist_sync_on_step: bool = False,
+        process_group: Optional[Any] = None,
     ):
         super().__init__()
 
@@ -59,10 +59,10 @@ class AUROC(Metric):
 
 class RMSE(Metric):
     def __init__(
-            self,
-            compute_on_step: bool = False,
-            dist_sync_on_step: bool = False,
-            process_group: Optional[Any] = None,
+        self,
+        compute_on_step: bool = False,
+        dist_sync_on_step: bool = False,
+        process_group: Optional[Any] = None,
     ):
         super().__init__()
 

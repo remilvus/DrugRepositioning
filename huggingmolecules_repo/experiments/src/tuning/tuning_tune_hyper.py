@@ -18,20 +18,20 @@ from ..gin.gin_utils import get_default_experiment_name
 
 @gin.configurable("optuna", denylist=["model", "featurizer"])
 def tune_hyper(
-        *,
-        model: Optional[PretrainedModelBase] = None,
-        featurizer: Optional[PretrainedFeaturizerMixin] = None,
-        root_path: str,
-        params: dict,
-        direction: str = "minimize",
-        metric: str = "valid_loss",
-        n_trials: Optional[int] = None,
-        timeout: Optional[float] = None,
-        sampler_name: str = "TPESampler",
-        storage: Optional[str] = None,
-        resume: bool = False,
-        retry_not_completed: bool = False,
-        print_and_save_results: bool = True
+    *,
+    model: Optional[PretrainedModelBase] = None,
+    featurizer: Optional[PretrainedFeaturizerMixin] = None,
+    root_path: str,
+    params: dict,
+    direction: str = "minimize",
+    metric: str = "valid_loss",
+    n_trials: Optional[int] = None,
+    timeout: Optional[float] = None,
+    sampler_name: str = "TPESampler",
+    storage: Optional[str] = None,
+    resume: bool = False,
+    retry_not_completed: bool = False,
+    print_and_save_results: bool = True
 ):
     import optuna
 

@@ -28,12 +28,12 @@ class Objective:
     import optuna
 
     def __init__(
-            self,
-            model: Optional[PretrainedModelBase],
-            featurizer: Optional[PretrainedFeaturizerMixin],
-            save_path: str,
-            optuna_params: dict,
-            metric: str,
+        self,
+        model: Optional[PretrainedModelBase],
+        featurizer: Optional[PretrainedFeaturizerMixin],
+        save_path: str,
+        optuna_params: dict,
+        metric: str,
     ):
         self.model = model
         self.featurizer = featurizer

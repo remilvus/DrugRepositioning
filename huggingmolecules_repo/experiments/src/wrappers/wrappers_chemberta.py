@@ -56,7 +56,7 @@ class ChembertaFeaturizer(
         )
 
     def _collate_encodings(
-            self, encodings: List[Tuple[dict, float]]
+        self, encodings: List[Tuple[dict, float]]
     ) -> ChembertaBatchEncoding:
         x_list, y_list = zip(*encodings)
         padded = self.tokenizer.pad(x_list, return_tensors="pt")
@@ -91,11 +91,11 @@ class ChembertaModelWrapper(PretrainedModelBase):
 
     @classmethod
     def from_pretrained(
-            cls,
-            pretrained_name: str,
-            *,
-            excluded: List[str] = None,
-            config: ChembertaConfig = None
+        cls,
+        pretrained_name: str,
+        *,
+        excluded: List[str] = None,
+        config: ChembertaConfig = None
     ) -> "ChembertaModelWrapper":
         model = transformers.AutoModelForSequenceClassification.from_pretrained(
             pretrained_name, num_labels=1

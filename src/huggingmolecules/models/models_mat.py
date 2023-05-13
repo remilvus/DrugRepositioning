@@ -115,16 +115,16 @@ class MatAttention(nn.Module):
         self.lambda_adjacency = 1.0 - self.lambda_attention - self.lambda_distance
 
     def forward(
-            self,
-            query,
-            key,
-            value,
-            mask,
-            dropout,
-            adj_matrix,
-            distance_matrix,
-            eps=1e-6,
-            inf=1e12,
+        self,
+        query,
+        key,
+        value,
+        mask,
+        dropout,
+        adj_matrix,
+        distance_matrix,
+        eps=1e-6,
+        inf=1e12,
     ):
         """Compute 'Scaled Dot Product Attention'"""
         d_k = query.size(-1)
@@ -149,9 +149,9 @@ class MatAttention(nn.Module):
         p_dist = distance_matrix.unsqueeze(1).repeat(1, query.shape[1], 1, 1)
 
         p_weighted = (
-                self.lambda_attention * p_attn
-                + self.lambda_distance * p_dist
-                + self.lambda_adjacency * p_adj
+            self.lambda_attention * p_attn
+            + self.lambda_distance * p_dist
+            + self.lambda_adjacency * p_adj
         )
         p_weighted = dropout(p_weighted)
 

@@ -51,7 +51,7 @@ class ChempropFeaturizer(
         self.features_generators = config.features_generators
 
     def _collate_encodings(
-            self, encodings: List[Tuple[Any, Optional[np.array], float]]
+        self, encodings: List[Tuple[Any, Optional[np.array], float]]
     ) -> ChempropBatchEncoding:
         mol_graph_list, features_list, y_list = zip(*encodings)
         batch_mol_graph = chemprop.features.BatchMolGraph(mol_graph_list)
@@ -67,7 +67,7 @@ class ChempropFeaturizer(
         )
 
     def _encode_smiles(
-            self, smiles: str, y: Optional[float]
+        self, smiles: str, y: Optional[float]
     ) -> Tuple[Any, np.array, float]:
         datapoint = chemprop.data.MoleculeDatapoint(
             [smiles], features_generator=self.features_generators

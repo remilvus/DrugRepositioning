@@ -18,7 +18,7 @@ T_Tensor = TypeVar("T_Tensor", bound=torch.Tensor)
 
 
 def pad_array(
-        array: T_Tensor, *, size: Tuple[int, ...], dtype: torch.dtype = None
+    array: T_Tensor, *, size: Tuple[int, ...], dtype: torch.dtype = None
 ) -> T_Tensor:
     if dtype is None:
         dtype = array.dtype
@@ -35,11 +35,11 @@ def pad_sequence(sequence: List[T_Tensor], dtype: torch.dtype = None) -> T_Tenso
 
 
 def add_dummy_node(
-        *,
-        node_features: np.ndarray = None,
-        adj_matrix: np.ndarray = None,
-        dist_matrix: np.ndarray = None,
-        bond_features: np.ndarray = None
+    *,
+    node_features: np.ndarray = None,
+    adj_matrix: np.ndarray = None,
+    dist_matrix: np.ndarray = None,
+    bond_features: np.ndarray = None
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     if node_features is not None:
         m = np.zeros((node_features.shape[0] + 1, node_features.shape[1] + 1))
