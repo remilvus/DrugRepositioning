@@ -1,9 +1,11 @@
+from copy import deepcopy
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
+
 import pandas as pd
 from torch.utils.data import Dataset
-from dataclasses import dataclass
-from copy import deepcopy
-from typing import Any
+
 from src.featurizers.featurizer import Featurizer
 
 
@@ -53,7 +55,8 @@ class LigandTargetActivityAndBinding(Dataset):
     def __getitem__(self, index):
         data_point = deepcopy(self.data[index])  # We do not want to keep features in self.data
         data_point.ligand_features = self.ligand_featurizer.from_smiles(data_point.ligand.smiles).get_features()
-        data_point.target_features = self.target_featurizer.from_pdb(data_point.target.pdb_file).get_features()
+        data_point.target_features = self.ligand_featurizer.from_smiles(data_point.ligand.smiles).get_features()
+        # data_point.target_features = self.target_featurizer.from_pdb(data_point.target.pdb_file).get_features()
         return data_point
 
     def __len__(self):

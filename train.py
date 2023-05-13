@@ -5,10 +5,9 @@ import torch
 from pytorch_lightning.loggers import WandbLogger
 import pytorch_lightning as pl
 
-from datamodules.single_target import SingleTargetSmilesDataModule
-from utils.data import get_target_names
-from model import SmilesTransformer
-
+from src.datamodules.single_target import SingleTargetSmilesDataModule
+from src.utils.data import get_target_names
+from src.model import SmilesTransformer
 
 if __name__ == "__main__":
     np.random.seed(0)
@@ -32,11 +31,11 @@ if __name__ == "__main__":
         datamodule = SingleTargetSmilesDataModule(name)
 
         wandb_logger = WandbLogger(
-                project="Drug Repositioning",
-                save_dir="../logs",
-                tags=["baseline", name],
-                reinit=True
-            )
+            project="Drug Repositioning",
+            save_dir="logs",
+            tags=["baseline", name],
+            reinit=True
+        )
 
         model = SmilesTransformer(
                 vocab_size=datamodule.vocab_size,

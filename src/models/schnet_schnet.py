@@ -1,6 +1,6 @@
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-import pytorch_lightning as pl
 from torch import optim
 from torch_geometric.nn import SchNet
 

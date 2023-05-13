@@ -40,10 +40,11 @@ class LigandTargetActivityAndBindingDataModule(pl.LightningDataModule):
     def __init__(self,
                  ligand_featurizer: Featurizer,
                  target_featurizer: Featurizer,
-                 path: Path = Path('../data/'),
+                 path: Path = Path('data/'),
                  batch_size: int = 32,
                  test_size: float = 0.2,
-                 val_size: float = 0.00001):
+                 val_size: float = 0.00001,
+                 num_workers: int = 0):
         super().__init__()
         self.ligand_featurizer = ligand_featurizer
         self.target_featurizer = target_featurizer
@@ -51,6 +52,7 @@ class LigandTargetActivityAndBindingDataModule(pl.LightningDataModule):
         self.batch_size = batch_size
         self.test_size = test_size
         self.val_size = val_size
+        self.num_workers = num_workers
         self.collate_fn = merge_collate_fns(ligand_featurizer.collate_fn, target_featurizer.collate_fn)
         self.train_dataset = self.val_dataset = self.test_dataset = self.predict_dataset = None
 
@@ -87,13 +89,17 @@ class LigandTargetActivityAndBindingDataModule(pl.LightningDataModule):
                                                                   self.target_featurizer)
 
     def train_dataloader(self):
-        return DataLoader(self.train_dataset, batch_size=self.batch_size, collate_fn=self.collate_fn)
+        return DataLoader(self.train_dataset, batch_size=self.batch_size, collate_fn=self.collate_fn,
+                          num_workers=self.num_workers)
 
     def val_dataloader(self):
-        return DataLoader(self.val_dataset, batch_size=self.batch_size, collate_fn=self.collate_fn)
+        return DataLoader(self.val_dataset, batch_size=self.batch_size, collate_fn=self.collate_fn,
+                          num_workers=self.num_workers)
 
     def test_dataloader(self):
-        return DataLoader(self.test_dataset, batch_size=self.batch_size, collate_fn=self.collate_fn)
+        return DataLoader(self.test_dataset, batch_size=self.batch_size, collate_fn=self.collate_fn,
+                          num_workers=self.num_workers)
 
     def predict_dataloader(self):
-        return DataLoader(self.predict_dataset, batch_size=self.batch_size, collate_fn=self.collate_fn)
+        return DataLoader(self.predict_dataset, batch_size=self.batch_size, collate_fn=self.collate_fn,
+                          num_workers=self.num_workers)
