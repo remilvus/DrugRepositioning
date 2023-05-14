@@ -1,1 +1,1 @@
-from .schnet_schnet import *
+from .regression import *

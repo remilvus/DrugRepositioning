@@ -9,4 +9,4 @@
 cd $HOME/DrugRepositioning
 source activate repositioning
 
-python -u train_schnet_schnet.py
+python -u train_regression.py
