@@ -49,6 +49,9 @@ class RegressionModel(pl.LightningModule):
             self.net = torch.nn.Sequential(CatLayer(), nn.Linear(2, 2))
 
     def forward(self, x: DataBatch):
+        self.log("train_num_ligand_nodes", x.ligand_features.node_z.size(0))
+        self.log("train_num_target_nodes", x.target_features.node_z.size(0))
+
         target_embedding = self.target_encoder(
             x.target_features.node_z,
             x.target_features.node_pos,
@@ -67,14 +70,14 @@ class RegressionModel(pl.LightningModule):
                 x.target_features.batch,
             )
         else:
-            return self.target_encoder(x.ligand_features)
+            return self.target_encoder(x.target_features)
 
     def forward_ligand(self, x: DataBatch):
         if self.ligand_schnet:
             return self.ligand_encoder(
-                x.target_features.node_z,
-                x.target_features.node_pos,
-                x.target_features.batch,
+                x.ligand_features.node_z,
+                x.ligand_features.node_pos,
+                x.ligand_features.batch,
             )
         else:
             return self.ligand_encoder(x.ligand_features)

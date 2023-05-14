@@ -26,13 +26,17 @@ if __name__ == "__main__":
         hyperparams = dict(hyperparams)
 
         if hyperparams["ligand_schnet"]:
-            ligand_featurizer = SchnetFeaturizer
+            ligand_featurizer = SchnetFeaturizer(use_bonds=True, cutout=False)
         else:
-            ligand_featurizer = RMatFeaturizer
+            ligand_featurizer = RMatFeaturizer(use_bonds=True, cutout=False)
         if hyperparams["target_schnet"]:
-            target_featurizer = SchnetFeaturizer
+            target_featurizer = SchnetFeaturizer(
+                use_bonds=False, cutout=True, cutout_radius=10.0
+            )
         else:
-            target_featurizer = RMatFeaturizer
+            target_featurizer = RMatFeaturizer(
+                use_bonds=False, cutout=True, cutout_radius=10.0
+            )
 
         wandb_logger = WandbLogger(
             project="Drug Repositioning",

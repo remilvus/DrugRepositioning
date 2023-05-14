@@ -19,6 +19,7 @@ class Ligand:
 class Target:
     name: str
     pdb_file: Path
+    pocket_center: tuple[float, float, float]
 
 
 @dataclass
@@ -60,14 +61,11 @@ class LigandTargetActivityAndBinding(Dataset):
         data_point = deepcopy(
             self.data[index]
         )  # We do not want to keep features in self.data
-        data_point.ligand_features = self.ligand_featurizer.from_smiles(
+        data_point.ligand_features = self.ligand_featurizer.load_from_smiles(
             data_point.ligand.smiles
         ).get_features()
-        # data_point.target_features = self.ligand_featurizer.from_smiles(
-        #     data_point.ligand.smiles
-        # ).get_features()
-        data_point.target_features = self.target_featurizer.from_pdb(
-            data_point.target.pdb_file
+        data_point.target_features = self.target_featurizer.load_from_pdb(
+            data_point.target.pdb_file, data_point.target.pocket_center
         ).get_features()
         return data_point
 
@@ -91,9 +89,17 @@ class LigandTargetActivityAndBinding(Dataset):
 
     @staticmethod
     def available_targets(path):
+        pockets_df = pd.read_csv(path / "pockets" / "pockets.csv")
+        pockets = {
+            target: (x, y, z)
+            for target, x, y, z in pockets_df[["target", "x", "y", "z"]].itertuples(
+                index=False, name=None
+            )
+        }
+
         targets = {
-            Target(f.stem, f)
+            Target(f.stem, f, pockets[f.stem])
             for f in path.glob("*.pdb")
-            if (f.with_suffix(".csv")).is_file()
+            if f.with_suffix(".csv").is_file() and f.stem in pockets.keys()
         }
         return targets

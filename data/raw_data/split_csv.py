@@ -16,5 +16,5 @@ for name, group in groups:
     sub_df = sub_df.rename(columns={name: "binding_score"})
 
     # Save the sub-dataframe to a CSV file
-    filename = name + ".csv"
+    filename = ".." + name + ".csv"
     sub_df.to_csv(filename, index=False)

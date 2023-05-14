@@ -5,6 +5,7 @@ from typing import *
 
 import numpy as np
 import torch
+from rdkit.Chem import Mol
 from sklearn.metrics import pairwise_distances
 
 from .featurizer import Featurizer
@@ -52,8 +53,12 @@ class RMatFeaturizer(Featurizer):
         mol = self.mol
 
         node_features = build_atom_features_matrix(mol)
-        bond_features = build_bond_features_matrix(mol)
-        adj_matrix = build_adjacency_matrix(mol)
+        if self.use_bonds:
+            bond_features = build_bond_features_matrix(mol)
+            adj_matrix = build_adjacency_matrix(mol)
+        else:
+            bond_features = np.random.rand(7, mol.GetNumAtoms(), mol.GetNumAtoms())
+            adj_matrix = np.random.rand(mol.GetNumAtoms(), mol.GetNumAtoms())
         pos_matrix = build_position_matrix(mol)
         dist_matrix = pairwise_distances(pos_matrix)
 
@@ -63,7 +68,10 @@ class RMatFeaturizer(Featurizer):
             dist_matrix=dist_matrix,
             bond_features=bond_features,
         )
-        relative_matrix = build_relative_matrix(adj_matrix)
+        if self.use_bonds:
+            relative_matrix = build_relative_matrix(adj_matrix)
+        else:
+            relative_matrix = np.random.rand(4 + 2, *adj_matrix.shape)
         bond_features, node_features = add_mask_feature(bond_features, node_features)
 
         return RMatMoleculeEncoding(
