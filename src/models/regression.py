@@ -46,7 +46,7 @@ class RegressionModel(pl.LightningModule):
         if cross_attention_head:
             raise NotImplementedError("")
         else:
-            self.net = torch.nn.Sequential(CatLayer(), nn.Linear(2, 2))
+            self.net = torch.nn.Sequential(CatLayer(), nn.LazyLinear(2))
 
     def forward(self, x: DataBatch):
         self.log("train_num_ligand_nodes", x.ligand_features.node_z.size(0))

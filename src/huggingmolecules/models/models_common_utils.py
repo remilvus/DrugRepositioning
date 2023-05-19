@@ -37,13 +37,17 @@ class Encoder(nn.Module):
         d_model: int,
         dropout: float,
         n_layers: int,
+        apply_norm=True,
     ):
         super(Encoder, self).__init__()
         layer = EncoderLayer(
             sa_layer=sa_layer, ff_layer=ff_layer, d_model=d_model, dropout=dropout
         )
         self.layers = clones(layer, n_layers)
-        self.norm = nn.LayerNorm(layer.size)
+        if apply_norm:
+            self.norm = nn.LayerNorm(layer.size)
+        else:
+            self.norm = torch.nn.Sequential()
 
     def forward(self, x, mask, **kwargs):
         """Pass the input (and mask) through each layer in turn."""
@@ -233,17 +237,17 @@ class Generator(nn.Module):
             d_model *= attn_out
 
         d_model += d_generated_features
-        if n_layers == 1:
-            self.proj = nn.Linear(d_model, d_output)
-        else:
-            self.proj = []
-            for i in range(n_layers - 1):
-                self.proj.append(nn.Linear(d_model, attn_hidden))
-                self.proj.append(nn.LeakyReLU(negative_slope=0.1))
-                self.proj.append(nn.LayerNorm(attn_hidden))
-                self.proj.append(nn.Dropout(dropout))
-            self.proj.append(nn.Linear(attn_hidden, d_output))
-            self.proj = torch.nn.Sequential(*self.proj)
+        # if n_layers == 1:
+        #     self.proj = nn.Linear(d_model, d_output)
+        # else:
+        #     self.proj = []
+        #     for i in range(n_layers - 1):
+        #         self.proj.append(nn.Linear(d_model, attn_hidden))
+        #         self.proj.append(nn.LeakyReLU(negative_slope=0.1))
+        #         self.proj.append(nn.LayerNorm(attn_hidden))
+        #         self.proj.append(nn.Dropout(dropout))
+        #     self.proj.append(nn.Linear(attn_hidden, d_output))
+        #     self.proj = torch.nn.Sequential(*self.proj)
         self.aggregation_type = aggregation_type
 
     def forward(self, x, mask, generated_features):
@@ -265,8 +269,8 @@ class Generator(nn.Module):
             out_avg_pooling = x
         if generated_features is not None:
             out_avg_pooling = torch.cat([out_avg_pooling, generated_features], 1)
-        projected = self.proj(out_avg_pooling)
-        return projected
+
+        return out_avg_pooling
 
 
 def get_activation_function(activation: str) -> nn.Module:
