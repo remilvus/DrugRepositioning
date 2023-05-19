@@ -46,7 +46,7 @@ class RegressionModel(pl.LightningModule):
         if cross_attention_head:
             raise NotImplementedError("")
         else:
-            self.net = torch.nn.Sequential(CatLayer(), nn.Linear(2, 2))
+            self.net = torch.nn.Sequential(CatLayer(), nn.LazyLinear(2))
 
     def forward(self, x: DataBatch):
         target_embedding = self.target_encoder(

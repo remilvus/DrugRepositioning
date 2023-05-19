@@ -72,12 +72,18 @@ class RMatModel(PretrainedModelBase[RMatBatchEncoding, RMatConfig]):
             n_layers=config.ffn_n_layers,
             dropout=config.dropout,
         )
-        self.encoder = Encoder(
-            sa_layer=sa_layer,
-            ff_layer=ff_layer,
-            d_model=config.d_model,
-            dropout=config.dropout,
-            n_layers=config.encoder_n_layers,
+        self.encoder = torch.nn.ModuleList(
+            [
+                Encoder(
+                    sa_layer=sa_layer,
+                    ff_layer=ff_layer,
+                    d_model=config.d_model,
+                    dropout=config.dropout,
+                    n_layers=1,
+                    apply_norm=i == (config.encoder_n_layers - 1),
+                )
+                for i in range(config.encoder_n_layers)
+            ]
         )
 
         # Generator
@@ -100,7 +106,9 @@ class RMatModel(PretrainedModelBase[RMatBatchEncoding, RMatConfig]):
         edges_att = torch.cat(
             (batch.bond_features, batch.relative_matrix, distances_matrix), dim=1
         )
-        encoded = self.encoder(embedded, batch_mask, edges_att=edges_att)
+        encoded = embedded
+        for encoder in self.encoder:
+            encoded = encoder(encoded, batch_mask, edges_att=edges_att)
         output = self.generator(encoded, batch_mask, batch.generated_features)
         return output
 
