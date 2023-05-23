@@ -82,23 +82,24 @@ def build_position_matrix(molecule: Mol) -> np.ndarray:
     )
 
 
-def build_atom_features_matrix(mol: Mol) -> np.ndarray:
-    return np.array([get_atom_features(atom) for atom in mol.GetAtoms()])
+def build_atom_features_matrix(mol: Mol, use_bonds: bool = True) -> np.ndarray:
+    return np.array([get_atom_features(atom, use_bonds) for atom in mol.GetAtoms()])
 
 
-def get_atom_features(atom) -> np.ndarray:
+def get_atom_features(atom, use_bonds) -> np.ndarray:
     features = []
 
     features += one_hot_vector(
         atom.GetAtomicNum(), [5, 6, 7, 8, 9, 15, 16, 17, 35, 53, 999]
     )
-    features += one_hot_vector(len(atom.GetNeighbors()), [0, 1, 2, 3, 4, 5])
-    features += one_hot_vector(atom.GetTotalNumHs(), [0, 1, 2, 3, 4])
-    features += one_hot_vector(
-        atom.GetFormalCharge(), [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
-    )
-    features.append(atom.IsInRing())
-    features.append(atom.GetIsAromatic())
+    if use_bonds:
+        features += one_hot_vector(len(atom.GetNeighbors()), [0, 1, 2, 3, 4, 5])
+        features += one_hot_vector(atom.GetTotalNumHs(), [0, 1, 2, 3, 4])
+        features += one_hot_vector(
+            atom.GetFormalCharge(), [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+        )
+        features.append(atom.IsInRing())
+        features.append(atom.GetIsAromatic())
 
     return np.array(features, dtype=np.float32)
 

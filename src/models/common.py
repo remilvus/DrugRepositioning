@@ -26,14 +26,15 @@ class CrossAttentionLayer(nn.Module):
             dropout=rmat_config.dropout,
             attention=RMatAttention(rmat_config),
         )
-        self.qk_norm = nn.LayerNorm(rmat_config.d_model)
-        self.v_norm = nn.LayerNorm(rmat_config.d_model)
+        self.vk_norm = nn.LayerNorm(rmat_config.d_model)
+        self.q_norm = nn.LayerNorm(rmat_config.d_model)
         self.dropout = nn.Dropout(rmat_config.dropout)
 
         self.size = rmat_config.d_model
 
-    def forward(self, qk: torch.Tensor, v: torch.Tensor, mask: torch.Tensor, **kwargs):
-        qk = self.qk_norm(qk)
-        v = self.v_norm(v)
-        a = self.cross_attn(qk, qk, v, mask=mask, **kwargs)
-        return v + self.dropout(a)
+    def forward(self, vk: torch.Tensor, q: torch.Tensor, mask: torch.Tensor, **kwargs):
+        x = vk
+        vk = self.vk_norm(vk)
+        q = self.q_norm(q)
+        a = self.cross_attn(q, vk, vk, mask=mask, **kwargs)
+        return x + self.dropout(a)

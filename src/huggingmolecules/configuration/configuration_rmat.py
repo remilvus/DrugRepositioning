@@ -11,6 +11,7 @@ RMAT_CONFIG_ARCH = {
 
 @dataclass
 class RMatConfig(PretrainedConfigMixin):
+    use_bonds: bool = True
     d_atom: int = 37
     d_edge: int = 46
     d_model: int = 768
@@ -38,3 +39,11 @@ class RMatConfig(PretrainedConfigMixin):
     @classmethod
     def _get_archive_dict(cls) -> dict:
         return RMAT_CONFIG_ARCH
+
+    @classmethod
+    def get_default(cls, use_bonds: bool):
+        config = cls()
+        if not use_bonds:
+            config.use_bonds = False
+            config.d_atom = 13
+        return config

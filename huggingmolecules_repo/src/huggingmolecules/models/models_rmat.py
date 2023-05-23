@@ -172,17 +172,13 @@ class RMatAttention(nn.Module):
             torch.empty(1, config.encoder_n_attn_heads, 1, d_k, 1)
         )
 
-    def forward(
-        self, query, key, value, mask, dropout, edges_att, inf=1e12, edges_att_v=None
-    ):
+    def forward(self, query, key, value, mask, dropout, edges_att, inf=1e12):
         """Compute 'Scaled Dot Product Attention'"""
         b, h, n, d_k = query.size(0), query.size(1), query.size(2), query.size(-1)
 
         # Prepare relative matrices
         relative_K = self.relative_K(edges_att)
-        if edges_att_v is None:
-            edges_att_v = edges_att
-        relative_V = self.relative_V(edges_att_v)
+        relative_V = self.relative_V(edges_att)
 
         scores1 = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
         scores2 = torch.matmul(

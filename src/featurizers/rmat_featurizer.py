@@ -5,10 +5,8 @@ from typing import *
 
 import numpy as np
 import torch
-from rdkit.Chem import Mol
 from sklearn.metrics import pairwise_distances
 
-from .featurizer import Featurizer
 from src.huggingmolecules.featurization.featurization_api import RecursiveToDeviceMixin
 from src.huggingmolecules.featurization.featurization_mat_utils import (
     add_dummy_node,
@@ -22,6 +20,7 @@ from src.huggingmolecules.featurization.featurization_rmat_utils import (
     build_relative_matrix,
     add_mask_feature,
 )
+from .featurizer import Featurizer
 
 
 @dataclass
@@ -52,13 +51,15 @@ class RMatFeaturizer(Featurizer):
     def get_features(self):
         mol = self.mol
 
-        node_features = build_atom_features_matrix(mol)
+        node_features = build_atom_features_matrix(mol, self.use_bonds)
+
         if self.use_bonds:
             bond_features = build_bond_features_matrix(mol)
             adj_matrix = build_adjacency_matrix(mol)
         else:
-            bond_features = np.random.rand(7, mol.GetNumAtoms(), mol.GetNumAtoms())
-            adj_matrix = np.random.rand(mol.GetNumAtoms(), mol.GetNumAtoms())
+            bond_features = None
+            adj_matrix = None
+
         pos_matrix = build_position_matrix(mol)
         dist_matrix = pairwise_distances(pos_matrix)
 
@@ -68,10 +69,11 @@ class RMatFeaturizer(Featurizer):
             dist_matrix=dist_matrix,
             bond_features=bond_features,
         )
+
         if self.use_bonds:
             relative_matrix = build_relative_matrix(adj_matrix)
         else:
-            relative_matrix = np.random.rand(4 + 2, *adj_matrix.shape)
+            relative_matrix = None
         bond_features, node_features = add_mask_feature(bond_features, node_features)
 
         return RMatMoleculeEncoding(
@@ -83,20 +85,23 @@ class RMatFeaturizer(Featurizer):
             y=None,
         )
 
-    @staticmethod
-    def collate_fn(encodings):
+    def collate_fn(self, encodings):
         node_features = pad_sequence(
             [torch.tensor(e.node_features).float() for e in encodings]
         )
         dist_matrix = pad_sequence(
             [torch.tensor(e.distance_matrix).float() for e in encodings]
         )
-        bond_features = pad_sequence(
-            [torch.tensor(e.bond_features).float() for e in encodings]
-        )
-        relative_matrix = pad_sequence(
-            [torch.tensor(e.relative_matrix).float() for e in encodings]
-        )
+        if self.use_bonds:
+            bond_features = pad_sequence(
+                [torch.tensor(e.bond_features).float() for e in encodings]
+            )
+            relative_matrix = pad_sequence(
+                [torch.tensor(e.relative_matrix).float() for e in encodings]
+            )
+        else:
+            bond_features = None
+            relative_matrix = None
 
         return RMatBatchEncoding(
             node_features=node_features,

@@ -73,10 +73,11 @@ def add_mask_feature(
     m[:, 1:] = node_features
     node_features = m
 
-    m = np.zeros(
-        (bond_features.shape[0] + 1, bond_features.shape[1], bond_features.shape[2])
-    )
-    m[1:, :, :] = bond_features
-    bond_features = m
+    if bond_features is not None:
+        m = np.zeros(
+            (bond_features.shape[0] + 1, bond_features.shape[1], bond_features.shape[2])
+        )
+        m[1:, :, :] = bond_features
+        bond_features = m
 
     return bond_features, node_features

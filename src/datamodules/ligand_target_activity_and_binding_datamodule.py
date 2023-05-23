@@ -120,7 +120,7 @@ class LigandTargetActivityAndBindingDataModule(pl.LightningDataModule):
                 test_ligands,
                 test_targets,
                 self.ligand_featurizer,
-                self.targer_featurizer,
+                self.target_featurizer,
             )
         if stage == "predict":
             self.predict_dataset = LigandTargetActivityAndBinding(

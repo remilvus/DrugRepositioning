@@ -1,25 +1,26 @@
 from itertools import product
 
 import numpy as np
+import pytorch_lightning as pl
 import torch
 from pytorch_lightning.loggers import WandbLogger
-import pytorch_lightning as pl
 
-from src.datamodules.single_target import SingleTargetSmilesDataModule
-from src.utils.data import get_target_names
-from src.model import SmilesTransformer
+from src.datamodules import LigandTargetActivityAndBindingDataModule
+from src.featurizers import RMatFeaturizer, SchnetFeaturizer
+from src.huggingmolecules import RMatConfig
+from src.models.common import CrossAttentionType
+from src.models.rmat_rmat import RmatRmatModel
 
 if __name__ == "__main__":
     np.random.seed(0)
     torch.random.manual_seed(0)
 
     configs = {
-        "lr": [1e-3, 3e-3],
-        "num_layers": [4],
-        "num_heads": [2, 16, 64],
-        "hidden_size": [256, 1024],
-        "dropout": [0.1],
-        "name": get_target_names(),
+        "lr": [1e-3],
+        "model": ["RMatRMat"],
+        # "model": ["RMatRMat", "RMatSchnet", "RMat"],
+        "cross_attention": [CrossAttentionType.NONE],
+        # "cross_attention": [CrossAttentionType.NONE, CrossAttentionType.LIGAND, CrossAttentionType.TARGET, CrossAttentionType.BOTH],
     }
     configs = product(
         *[zip([name] * len(values), values) for name, values in configs.items()]
@@ -27,28 +28,58 @@ if __name__ == "__main__":
 
     for hyperparams in configs:
         hyperparams = dict(hyperparams)
-        name = hyperparams["name"]
-        print(f"Training with config:\n{hyperparams}")
-        datamodule = SingleTargetSmilesDataModule(name)
+
+        ligand_featurizer = RMatFeaturizer(use_bonds=False, cutout=False)
+
+        if hyperparams["model"] in ["RMatSchnet"]:
+            target_featurizer = SchnetFeaturizer(
+                use_bonds=False, cutout=True, cutout_radius=10.0
+            )
+        elif hyperparams["model"] in ["RMatRMat"]:
+            target_featurizer = RMatFeaturizer(
+                use_bonds=False, cutout=True, cutout_radius=10.0
+            )
+
+        # TODO: report avg, min, max number of atoms after cutouts
 
         wandb_logger = WandbLogger(
             project="Drug Repositioning",
+            entity="drug_repositioning",
             save_dir="logs",
-            tags=["baseline", name],
+            tags=[],
             reinit=True,
         )
 
-        model = SmilesTransformer(vocab_size=datamodule.vocab_size, **hyperparams)
+        datamodule = LigandTargetActivityAndBindingDataModule(
+            ligand_featurizer,
+            target_featurizer,
+            num_workers=0,
+            batch_size=8,
+        )
+
+        if hyperparams["model"] == "RMatRMat":
+            model = RmatRmatModel(
+                rmat_config=RMatConfig.get_default(use_bonds=False), **hyperparams
+            )
+        elif hyperparams["model"] == "RMatSchnet":
+            # TODO: implement RMatSchnet
+            ...
+        elif hyperparams["model"] == "RMat":
+            # TODO: implement RMat processing combined features
+            ...
 
         trainer = pl.Trainer(
-            max_epochs=50,
-            log_every_n_steps=5,
+            max_epochs=30,
+            log_every_n_steps=1,
             devices=1,
-            accelerator="gpu",
+            accelerator="auto",
             precision=32,
             logger=wandb_logger,
             fast_dev_run=False,
+            # limit_train_batches=1,
+            # profiler="advanced",
         )
+
         trainer.fit(model=model, datamodule=datamodule)
 
         wandb_logger.experiment.finish()

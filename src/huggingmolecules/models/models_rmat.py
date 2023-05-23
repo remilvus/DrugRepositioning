@@ -72,18 +72,12 @@ class RMatModel(PretrainedModelBase[RMatBatchEncoding, RMatConfig]):
             n_layers=config.ffn_n_layers,
             dropout=config.dropout,
         )
-        self.encoder = torch.nn.ModuleList(
-            [
-                Encoder(
-                    sa_layer=sa_layer,
-                    ff_layer=ff_layer,
-                    d_model=config.d_model,
-                    dropout=config.dropout,
-                    n_layers=1,
-                    apply_norm=i == (config.encoder_n_layers - 1),
-                )
-                for i in range(config.encoder_n_layers)
-            ]
+        self.encoder = Encoder(
+            sa_layer=sa_layer,
+            ff_layer=ff_layer,
+            d_model=config.d_model,
+            dropout=config.dropout,
+            n_layers=config.encoder_n_layers,
         )
 
         # Generator
@@ -106,9 +100,7 @@ class RMatModel(PretrainedModelBase[RMatBatchEncoding, RMatConfig]):
         edges_att = torch.cat(
             (batch.bond_features, batch.relative_matrix, distances_matrix), dim=1
         )
-        encoded = embedded
-        for encoder in self.encoder:
-            encoded = encoder(encoded, batch_mask, edges_att=edges_att)
+        encoded = self.encoder(embedded, batch_mask, edges_att=edges_att)
         output = self.generator(encoded, batch_mask, batch.generated_features)
         return output
 
@@ -170,33 +162,52 @@ class RMatAttention(nn.Module):
         super().__init__()
         d_k = config.d_model // config.encoder_n_attn_heads
 
-        self.relative_K = RMatEdgeFeaturesLayer(config)
-        self.relative_V = RMatEdgeFeaturesLayer(config)
+        self.use_bonds = config.use_bonds
 
-        self.relative_u = nn.Parameter(
-            torch.empty(1, config.encoder_n_attn_heads, 1, d_k)
-        )
-        self.relative_v = nn.Parameter(
-            torch.empty(1, config.encoder_n_attn_heads, 1, d_k, 1)
-        )
+        if self.use_bonds:
+            self.relative_K = RMatEdgeFeaturesLayer(config)
+            self.relative_V = RMatEdgeFeaturesLayer(config)
 
-    def forward(self, query, key, value, mask, dropout, edges_att, inf=1e12):
+            self.relative_u = nn.Parameter(
+                torch.empty(1, config.encoder_n_attn_heads, 1, d_k)
+            )
+            self.relative_v = nn.Parameter(
+                torch.empty(1, config.encoder_n_attn_heads, 1, d_k, 1)
+            )
+
+    def forward(
+        self,
+        query,
+        key,
+        value,
+        mask,
+        dropout,
+        edges_att=None,
+        inf=1e12,
+        edges_att_v=None,
+    ):
         """Compute 'Scaled Dot Product Attention'"""
         b, h, n, d_k = query.size(0), query.size(1), query.size(2), query.size(-1)
 
-        # Prepare relative matrices
-        relative_K = self.relative_K(edges_att)
-        relative_V = self.relative_V(edges_att)
-
         scores1 = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
-        scores2 = torch.matmul(
-            (query + key).view(b, h, n, 1, d_k), relative_K.permute(0, 1, 3, 2, 4)
-        ).view(b, h, n, n) / math.sqrt(d_k)
-        scores3 = torch.matmul(key, self.relative_u.transpose(-2, -1))
-        scores4 = torch.matmul(
-            relative_K.permute(0, 1, 3, 4, 2), self.relative_v
-        ).squeeze(-1)
-        scores = scores1 + scores2 + scores3 + scores4  # + scores5
+
+        if self.use_bonds:
+            # Prepare relative matrices
+            relative_K = self.relative_K(edges_att)
+            if edges_att_v is None:
+                edges_att_v = edges_att
+            relative_V = self.relative_V(edges_att_v)
+
+            scores2 = torch.matmul(
+                (query + key).view(b, h, n, 1, d_k), relative_K.permute(0, 1, 3, 2, 4)
+            ).view(b, h, n, n) / math.sqrt(d_k)
+            scores3 = torch.matmul(key, self.relative_u.transpose(-2, -1))
+            scores4 = torch.matmul(
+                relative_K.permute(0, 1, 3, 4, 2), self.relative_v
+            ).squeeze(-1)
+            scores = scores1 + scores2 + scores3 + scores4  # + scores5
+        else:
+            scores = scores1
 
         if mask is not None:
             scores = scores.masked_fill(mask.unsqueeze(1).repeat(1, h, n, 1) == 0, -inf)
@@ -205,7 +216,13 @@ class RMatAttention(nn.Module):
         p_attn = dropout(p_attn)
 
         atoms_features1 = torch.matmul(p_attn, value)
-        atoms_features2 = (p_attn.unsqueeze(2) * relative_V).sum(-1).permute(0, 1, 3, 2)
+
+        if self.use_bonds:
+            atoms_features2 = (
+                (p_attn.unsqueeze(2) * relative_V).sum(-1).permute(0, 1, 3, 2)
+            )
+        else:
+            atoms_features2 = 0
 
         atoms_features = atoms_features1 + atoms_features2
 
