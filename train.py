@@ -20,6 +20,8 @@ if __name__ == "__main__":
         "model": ["RMatRMat"],
         # "model": ["RMatRMat", "RMatSchnet", "RMat"],
         "cross_attention": [CrossAttentionType.NONE],
+        "targets" : [['binding_score','IC50','Ki']], # in ['Ki','IC50','binding_score']
+        "thresholds" : [{'binding_score':-9.,'IC50':12000.,'Ki':50.}], # in ['Ki','IC50','binding_score']
         # "cross_attention": [CrossAttentionType.NONE, CrossAttentionType.LIGAND, CrossAttentionType.TARGET, CrossAttentionType.BOTH],
     }
     configs = product(
