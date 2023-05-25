@@ -196,7 +196,7 @@ class RmatRmatModel(pl.LightningModule):
             if target in self.threshold_heads:
                 # for threshold head mask only nans
                 x['mask'][target]['threshold'] = mask
-                threshold_mask = (values <= self.thresholds[target])
+                threshold_mask = (self.thresholds[target][0] <= values) & (values<= self.thresholds[target][1])
                 # ones * (value < threshold)
                 threshold_target = torch.ones_like(values) * threshold_mask.int().float()
                 # filter out entries where value==NaN

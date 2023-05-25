@@ -21,9 +21,15 @@ if __name__ == "__main__":
         # "model": ["RMatRMat", "RMatSchnet", "RMat"],
         "cross_attention": [CrossAttentionType.NONE],
         "targets" : [['binding_score','IC50','Ki']], # in ['Ki','IC50','binding_score']
-        "thresholds" : [{'binding_score':-9.,'IC50':12000.,'Ki':50.}], # in ['Ki','IC50','binding_score']
+        "thresholds" : [{'binding_score':(-torch.inf,10.),'IC50':(-torch.inf,600.),'Ki':(-torch.inf,5000.)}], # in ['Ki','IC50','binding_score']
         # "cross_attention": [CrossAttentionType.NONE, CrossAttentionType.LIGAND, CrossAttentionType.TARGET, CrossAttentionType.BOTH],
     }
+    # docking score that is related to the free energy of binding of a ligand to a receptor.
+    # For this type of docking score, the more negative the score, the better.
+
+    # Generalnie przyjmuje się, że Ki poniżej 1000 (jednostką są nM) determinuje aktywność
+
+    # consider IC50 of <100 nM to be active, 101 nM to 300 nM to be moderately active, and >300 nM to be inactive
     configs = product(
         *[zip([name] * len(values), values) for name, values in configs.items()]
     )
