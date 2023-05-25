@@ -16,7 +16,8 @@ class DataBatch(RecursiveToDeviceMixin):
     ligand_features: torch.FloatTensor
     target: list[Target]
     target_features: torch.FloatTensor
-    activity: torch.FloatTensor
+    activity_Ki: torch.FloatTensor
+    activity_IC50: torch.FloatTensor
     binding_score: torch.FloatTensor
 
 
@@ -32,8 +33,11 @@ def merge_collate_fns(ligand_collate_fn, target_collate_fn):
             [datapoint.ligand_features for datapoint in datapoints]
         )
 
-        activities = torch.stack(
-            [torch.tensor(datapoint.activity).float() for datapoint in datapoints]
+        activities_Ki = torch.stack(
+            [torch.tensor(datapoint.activity_Ki).float() for datapoint in datapoints]
+        )
+        activities_IC50 = torch.stack(
+            [torch.tensor(datapoint.activity_IC50).float() for datapoint in datapoints]
         )
         binding_scores = torch.stack(
             [torch.tensor(datapoint.binding_score).float() for datapoint in datapoints]
@@ -44,7 +48,8 @@ def merge_collate_fns(ligand_collate_fn, target_collate_fn):
             ligands_features,
             targets,
             targets_features,
-            activities,
+            activities_Ki,
+            activities_IC50,
             binding_scores,
         )
 

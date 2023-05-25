@@ -1,4 +1,4 @@
-smiles,ChEMBL_ID,activity,binding_score
+smiles,ChEMBL_ID,activity_IC50,binding_score
 CS(=O)(=O)Nc1ccc2ccc3ncc(cc3c(=O)c2c1)-c1ccccc1,CHEMBL1803004,50000.0,-10.93921
 Oc1ncnc2[nH]ncc12,CHEMBL1467,10000.0,-5.60542
 CC(=O)N1CCN(CC1)c1ccc(OCC2COC(Cn3ccnc3)(O2)c2ccc(Cl)cc2Cl)cc1,CHEMBL157101,8800.0,-10.26059

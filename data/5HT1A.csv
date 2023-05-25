@@ -1,4 +1,4 @@
-smiles,ChEMBL_ID,activity,binding_score
+smiles,ChEMBL_ID,activity_Ki,binding_score
 COc1ccc2occ3CC[C@@H](CN)c1c23,CHEMBL119584,860.0,-6.84978
 CN1CCc2cccc-3c2[C@H]1Cc1cccc(C)c-31,CHEMBL27940,14.4,-8.42447
 CN(C)[C@@H]1Cc2cccc3nc(O)n(C1)c23,CHEMBL422344,92.0,-6.79893

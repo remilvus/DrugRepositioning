@@ -1,3 +1,4 @@
+import torch
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
@@ -28,7 +29,8 @@ class DataPoint:
     ligand_features: Any
     target: Target
     target_features: Any
-    activity: float
+    activity_Ki: float
+    activity_IC50: float
     binding_score: float
 
 
@@ -51,10 +53,16 @@ class LigandTargetActivityAndBinding(Dataset):
             for i in range(len(df)):
                 ligand = Ligand(df["ChEMBL_ID"].iloc[i], df["smiles"].iloc[i])
                 if ligand in ligands:
-                    activity = df["activity"].iloc[i]
-                    binding_score = df["binding_score"].iloc[i]
+                    activity_Ki, activity_IC50, binding_score = torch.nan, torch.nan, torch.nan
+                    if 'activity_Ki' in df.columns:
+                        activity_Ki = df["activity_Ki"].iloc[i]
+                    if 'activity_IC50' in df.columns:
+                        activity_IC50 = df["activity_IC50"].iloc[i]
+                    if 'binding_score' in df.columns:
+                        binding_score = df["binding_score"].iloc[i]
                     self.data.append(
-                        DataPoint(ligand, None, target, None, activity, binding_score)
+                        DataPoint(ligand, None, target, None,
+                                  activity_Ki=activity_Ki,activity_IC50=activity_IC50,binding_score=binding_score)
                     )
 
     def __getitem__(self, index):

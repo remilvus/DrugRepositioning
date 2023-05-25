@@ -83,6 +83,7 @@ class RegressionModel(pl.LightningModule):
             return self.ligand_encoder(x.ligand_features)
 
     def training_step(self, batch, batch_idx):
+        # TODO: use activity_Ki or activity_IC50
         y = torch.cat(
             [batch.activity.unsqueeze(1), batch.binding_score.unsqueeze(1)], dim=1
         )

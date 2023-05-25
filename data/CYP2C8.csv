@@ -1,4 +1,4 @@
-smiles,ChEMBL_ID,activity,binding_score
+smiles,ChEMBL_ID,activity_IC50,binding_score
 Fc1cc(F)c(cc1Cl)-c1cc(Nc2ccncc2)c2cc[nH]c2n1,CHEMBL4437930,100.0,-9.83006
 OCc1ccc(Oc2ccc(cc2C#N)S(=O)(=O)Nc2ccc(F)cn2)cc1Cl,CHEMBL3688197,9900.0,-10.14006
 CNC(=O)c1c(oc2ccc(cc12)-c1cc(ccc1C)C(=O)NC1(CC1)c1cccnc1)-c1ccc(F)cc1,CHEMBL4096241,350.0,-11.63223
