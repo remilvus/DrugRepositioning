@@ -26,8 +26,8 @@ if __name__ == "__main__":
         "thresholds": [
             {
                 "binding_score": (-torch.inf, 4.0),
-                "IC50": (-torch.inf, 900.0),
-                "Ki": (-torch.inf, 3000.0),
+                "IC50": (-torch.inf, np.log10(900.0)),
+                "Ki": (-torch.inf, np.log10(3000.0)),
             }
         ],  # in ['Ki','IC50','binding_score']
         # "cross_attention": [CrossAttentionType.NONE, CrossAttentionType.LIGAND, CrossAttentionType.TARGET, CrossAttentionType.BOTH],
