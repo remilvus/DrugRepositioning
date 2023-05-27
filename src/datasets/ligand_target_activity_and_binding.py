@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+import numpy as np
 from torch.utils.data import Dataset
 
 from src.featurizers.featurizer import Featurizer
@@ -53,11 +54,11 @@ class LigandTargetActivityAndBinding(Dataset):
             for i in range(len(df)):
                 ligand = Ligand(df["ChEMBL_ID"].iloc[i], df["smiles"].iloc[i])
                 if ligand in ligands:
-                    activity_Ki, activity_IC50, binding_score = torch.nan, torch.nan, torch.nan
+                    activity_Ki, activity_IC50, binding_score = np.nan, np.nan, np.nan
                     if 'activity_Ki' in df.columns:
-                        activity_Ki = df["activity_Ki"].iloc[i]
+                        activity_Ki = np.log(df["activity_Ki"].iloc[i])
                     if 'activity_IC50' in df.columns:
-                        activity_IC50 = df["activity_IC50"].iloc[i]
+                        activity_IC50 = np.log(df["activity_IC50"].iloc[i])
                     if 'binding_score' in df.columns:
                         binding_score = df["binding_score"].iloc[i]
                     self.data.append(

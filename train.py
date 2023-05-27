@@ -21,7 +21,7 @@ if __name__ == "__main__":
         # "model": ["RMatRMat", "RMatSchnet", "RMat"],
         "cross_attention": [CrossAttentionType.NONE],
         "targets" : [['binding_score','IC50','Ki']], # in ['Ki','IC50','binding_score']
-        "thresholds" : [{'binding_score':(-torch.inf,10.),'IC50':(-torch.inf,600.),'Ki':(-torch.inf,5000.)}], # in ['Ki','IC50','binding_score']
+        "thresholds" : [{'binding_score':(-torch.inf,4.),'IC50':(-torch.inf,900.),'Ki':(-torch.inf,3000.)}], # in ['Ki','IC50','binding_score']
         # "cross_attention": [CrossAttentionType.NONE, CrossAttentionType.LIGAND, CrossAttentionType.TARGET, CrossAttentionType.BOTH],
     }
     # docking score that is related to the free energy of binding of a ligand to a receptor.
