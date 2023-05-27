@@ -7,18 +7,19 @@ import torch
 from torch.utils.data import Dataset
 
 
-def load_datasets(data_root="../data") -> Dict[str, pd.DataFrame]:
+def load_datasets(data_root="../data", dropna=True) -> Dict[str, pd.DataFrame]:
     data_root = Path(data_root)
     frames = {
-        f.name: pd.read_csv(f, header=None, names=["smiles", "chembl", "target"])
-        for f in data_root.iterdir()
+        f.name: pd.read_csv(f)
+        for f in data_root.iterdir() if f.is_file() and f.name.endswith('csv')
     }
     for name, df in frames.items():
         all_rows = len(df)
-        df.dropna(axis=0, inplace=True)
-        rows = len(df)
-        if all_rows > rows:
-            print(f"Dropped {all_rows - rows} for {name} (reason: NaN)")
+        if dropna:
+            df.dropna(axis=0, inplace=True)
+            rows = len(df)
+            if all_rows > rows:
+                print(f"Dropped {all_rows - rows} for {name} (reason: NaN)")
     return frames
 
 
