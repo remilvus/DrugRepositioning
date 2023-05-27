@@ -55,9 +55,9 @@ class LigandTargetActivityAndBinding(Dataset):
                 if ligand in ligands:
                     activity_Ki, activity_IC50, binding_score = np.nan, np.nan, np.nan
                     if "activity_Ki" in df.columns:
-                        activity_Ki = np.log(df["activity_Ki"].iloc[i])
+                        activity_Ki = df["activity_Ki"].iloc[i]
                     if "activity_IC50" in df.columns:
-                        activity_IC50 = np.log(df["activity_IC50"].iloc[i])
+                        activity_IC50 = df["activity_IC50"].iloc[i]
                     if "binding_score" in df.columns:
                         binding_score = df["binding_score"].iloc[i]
                     self.data.append(
