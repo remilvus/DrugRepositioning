@@ -41,15 +41,20 @@ class CrossAttentionLayer(nn.Module):
 
 
 class Head(nn.Module):
-
-    def __init__(self, in_size: int, out_size: int, layers: int = 2, activation='identity',
-                 narrowing: bool = False):
+    def __init__(
+        self,
+        in_size: int,
+        out_size: int,
+        layers: int = 2,
+        activation="identity",
+        narrowing: bool = False,
+    ):
         super().__init__()
         activations_list = {
-            'relu': nn.ReLU(),
-            'sigmoid': nn.Sigmoid(),
-            'tanh': nn.Tanh(),
-            'identity': nn.Identity(),
+            "relu": nn.ReLU(),
+            "sigmoid": nn.Sigmoid(),
+            "tanh": nn.Tanh(),
+            "identity": nn.Identity(),
         }
         layers_ = []
         if narrowing:

@@ -11,7 +11,8 @@ def load_datasets(data_root="../data", dropna=True) -> Dict[str, pd.DataFrame]:
     data_root = Path(data_root)
     frames = {
         f.name: pd.read_csv(f)
-        for f in data_root.iterdir() if f.is_file() and f.name.endswith('csv')
+        for f in data_root.iterdir()
+        if f.is_file() and f.name.endswith("csv")
     }
     for name, df in frames.items():
         all_rows = len(df)

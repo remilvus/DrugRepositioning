@@ -14,17 +14,17 @@ from src.huggingmolecules.models.models_common_utils import clones
 
 class RmatRmatModel(pl.LightningModule):
     def __init__(
-            self,
-            lr: float = 1e-3,
-            cross_attention_type: CrossAttentionType = CrossAttentionType.NONE,
-            rmat_config: RMatConfig = RMatConfig.get_default(use_bonds=False),
-            latent_size: int = None,
-            targets=[],
-            thresholds={},
-            **kwargs,
+        self,
+        lr: float = 1e-3,
+        cross_attention_type: CrossAttentionType = CrossAttentionType.NONE,
+        rmat_config: RMatConfig = RMatConfig.get_default(use_bonds=False),
+        latent_size: int = None,
+        targets=[],
+        thresholds={},
+        **kwargs,
     ):
         assert len(targets) > 0
-        assert all((target in ['Ki', 'IC50', 'binding_score']) for target in targets)
+        assert all((target in ["Ki", "IC50", "binding_score"]) for target in targets)
         super(RmatRmatModel, self).__init__()
         self.save_hyperparameters()
 
@@ -41,7 +41,10 @@ class RmatRmatModel(pl.LightningModule):
         if latent_size is None:
             latent_size = rmat_config.d_model
         self.aggregator = nn.Sequential(
-            nn.Linear(in_features=2 * rmat_config.d_model, out_features=2 * rmat_config.d_model),
+            nn.Linear(
+                in_features=2 * rmat_config.d_model,
+                out_features=2 * rmat_config.d_model,
+            ),
             # nn.BatchNorm1d(2 * rmat_config.d_model),
             nn.ReLU(),
             nn.Linear(in_features=2 * rmat_config.d_model, out_features=latent_size),
@@ -58,23 +61,29 @@ class RmatRmatModel(pl.LightningModule):
             heads[target] = Head(latent_size, 1, 2)
             if target in thresholds.keys():
                 threshold_heads[target] = {}
-                threshold_heads[target] = Head(latent_size, 1, 2, 'sigmoid')
+                threshold_heads[target] = Head(latent_size, 1, 2, "sigmoid")
                 self.thresholds[target] = thresholds[target]
         self.heads = nn.ModuleDict(heads)
         self.threshold_heads = nn.ModuleDict(threshold_heads)
 
     def forward(self, x: DataBatch):
-        ligand_batch = x['data'].ligand_features
-        target_batch = x['data'].target_features
+        ligand_batch = x["data"].ligand_features
+        target_batch = x["data"].target_features
         # PL logger requires it to be float
-        self.log("train_num_ligand_nodes", float(x['data'].ligand_features.node_features.size(1)))
-        self.log("train_num_target_nodes", float(x['data'].target_features.node_features.size(1)))
+        self.log(
+            "train_num_ligand_nodes",
+            float(x["data"].ligand_features.node_features.size(1)),
+        )
+        self.log(
+            "train_num_target_nodes",
+            float(x["data"].target_features.node_features.size(1)),
+        )
 
         ligand_batch_mask = (
-                torch.sum(torch.abs(ligand_batch.node_features), dim=-1) != 0
+            torch.sum(torch.abs(ligand_batch.node_features), dim=-1) != 0
         )
         target_batch_mask = (
-                torch.sum(torch.abs(target_batch.node_features), dim=-1) != 0
+            torch.sum(torch.abs(target_batch.node_features), dim=-1) != 0
         )
 
         ligand_latent = self.ligand_rmat.src_embed(ligand_batch.node_features)
@@ -108,10 +117,10 @@ class RmatRmatModel(pl.LightningModule):
             ligand_edges_att = target_edges_att = None
 
         for (
-                ligand_rmat_encoder_layer,
-                target_rmat_encoder_layer,
-                ligand_ca_layer,
-                target_ca_layer,
+            ligand_rmat_encoder_layer,
+            target_rmat_encoder_layer,
+            ligand_ca_layer,
+            target_ca_layer,
         ) in zip(
             self.ligand_rmat.encoder.layers,
             self.target_rmat.encoder.layers,
@@ -166,13 +175,13 @@ class RmatRmatModel(pl.LightningModule):
             output[target] = {}
 
             if target in self.threshold_heads.keys():
-                threshold_input = latent_code[x['mask'][target]['threshold'], None]
+                threshold_input = latent_code[x["mask"][target]["threshold"], None]
                 out_threshold = self.threshold_heads[target](threshold_input)
-                output[target]['threshold'] = out_threshold
+                output[target]["threshold"] = out_threshold
 
-            val_input = latent_code[x['mask'][target]['value'], None]
+            val_input = latent_code[x["mask"][target]["value"], None]
             out_value = self.heads[target](val_input)
-            output[target]['value'] = out_value
+            output[target]["value"] = out_value
 
         return output
 
@@ -180,47 +189,55 @@ class RmatRmatModel(pl.LightningModule):
         # WARNING!!!
         # masking assumes y is of shape (batch_size,1)
         y = {}
-        x = {'data': batch}
-        x['mask'] = {}
+        x = {"data": batch}
+        x["mask"] = {}
         for target in self.targets:
-            if target == 'Ki':
+            if target == "Ki":
                 values = batch.activity_Ki.unsqueeze(1)
-            elif target == 'IC50':
+            elif target == "IC50":
                 values = batch.activity_IC50.unsqueeze(1)
-            elif target == 'binding_score':
+            elif target == "binding_score":
                 values = batch.binding_score.unsqueeze(1)
 
-            x['mask'][target] = {}
+            x["mask"][target] = {}
             mask = ~(torch.isnan(values))
             y[target] = {}
             if target in self.threshold_heads:
                 # for threshold head mask only nans
-                x['mask'][target]['threshold'] = mask
-                threshold_mask = (self.thresholds[target][0] <= values) & (values<= self.thresholds[target][1])
+                x["mask"][target]["threshold"] = mask
+                threshold_mask = (self.thresholds[target][0] <= values) & (
+                    values <= self.thresholds[target][1]
+                )
                 # ones * (value < threshold)
-                threshold_target = torch.ones_like(values) * threshold_mask.int().float()
+                threshold_target = (
+                    torch.ones_like(values) * threshold_mask.int().float()
+                )
                 # filter out entries where value==NaN
-                threshold_target = threshold_target[mask,None]
-                y[target]['threshold'] = threshold_target
-                mask = (mask & threshold_mask)
+                threshold_target = threshold_target[mask, None]
+                y[target]["threshold"] = threshold_target
+                mask = mask & threshold_mask
 
-            x['mask'][target]['value'] = mask
-            y[target]['value'] = values[x['mask'][target]['value'], None]
+            x["mask"][target]["value"] = mask
+            y[target]["value"] = values[x["mask"][target]["value"], None]
         y_hat = self(x)
         loss = 0
         for target in self.targets:
             # if whole target was discarded by mask then loss on empty tensors is NaN
-            if target in self.threshold_heads and len(y[target]['threshold']) > 0:
-                loss_threshold = nn.functional.binary_cross_entropy(y_hat[target]['threshold'],y[target]['threshold'])
+            if target in self.threshold_heads and len(y[target]["threshold"]) > 0:
+                loss_threshold = nn.functional.binary_cross_entropy(
+                    y_hat[target]["threshold"], y[target]["threshold"]
+                )
                 loss += loss_threshold
 
-                self.log("train/loss_"+target+'/threshold', loss_threshold)
+                self.log("train/loss_" + target + "/threshold", loss_threshold)
             # if whole target was discarded by mask then loss on empty tensors is NaN
-            if len(y[target]['value']) > 0:
-                loss_value = nn.functional.mse_loss(y_hat[target]['value'], y[target]['value'])
+            if len(y[target]["value"]) > 0:
+                loss_value = nn.functional.mse_loss(
+                    y_hat[target]["value"], y[target]["value"]
+                )
                 loss += loss_value
 
-                self.log("train/loss_" + target + '/value', loss_value)
+                self.log("train/loss_" + target + "/value", loss_value)
 
         self.log("train/loss", loss)
         return loss
