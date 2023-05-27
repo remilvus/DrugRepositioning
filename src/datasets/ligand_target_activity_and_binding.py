@@ -1,6 +1,3 @@
-import random
-
-import torch
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
@@ -44,7 +41,6 @@ class LigandTargetActivityAndBinding(Dataset):
         targets: set,
         ligand_featurizer: Featurizer,
         target_featurizer: Featurizer,
-        shuffle=True,
     ):
         self.data = []
         self.ligands = {}
@@ -68,8 +64,6 @@ class LigandTargetActivityAndBinding(Dataset):
                         DataPoint(ligand, None, target, None,
                                   activity_Ki=activity_Ki,activity_IC50=activity_IC50,binding_score=binding_score)
                     )
-        if shuffle:
-            random.shuffle(self.data)
 
     def __getitem__(self, index):
         data_point = deepcopy(

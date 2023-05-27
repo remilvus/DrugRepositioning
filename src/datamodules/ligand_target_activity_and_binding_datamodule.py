@@ -141,6 +141,7 @@ class LigandTargetActivityAndBindingDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             collate_fn=self.collate_fn,
             num_workers=self.num_workers,
+            shuffle=True,
         )
 
     def val_dataloader(self):
