@@ -39,6 +39,8 @@ class Featurizer:
         assert not self.cutout
         try:
             mol = Chem.MolFromSmiles(smiles)
+            if mol is None:
+                raise ValueError(f"Failed to create mol from `{smiles}`")
             mol = Chem.AddHs(mol)
             AllChem.EmbedMolecule(mol, maxAttempts=5000)
             AllChem.UFFOptimizeMolecule(mol)
