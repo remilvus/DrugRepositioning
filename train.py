@@ -17,6 +17,7 @@ if __name__ == "__main__":
 
     configs = {
         "lr": [1e-3],
+        "batch_size": [32],
         "model": ["RMatRMat"],
         # "model": ["RMatRMat", "RMatSchnet", "RMat"],
         "cross_attention": [CrossAttentionType.NONE],
@@ -44,6 +45,7 @@ if __name__ == "__main__":
 
     for hyperparams in configs:
         hyperparams = dict(hyperparams)
+        batch_size = hyperparams['batch_size']
 
         ligand_featurizer = RMatFeaturizer(use_bonds=False, cutout=False)
 
@@ -70,7 +72,7 @@ if __name__ == "__main__":
             ligand_featurizer,
             target_featurizer,
             num_workers=0,
-            batch_size=8,
+            batch_size=batch_size,
         )
 
         if hyperparams["model"] == "RMatRMat":
