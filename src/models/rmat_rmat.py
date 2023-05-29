@@ -21,6 +21,7 @@ class RmatRmatModel(pl.LightningModule):
         latent_size: int = None,
         targets=[],
         thresholds={},
+        activity_importance=0.0,
         **kwargs,
     ):
         assert len(targets) > 0
@@ -65,6 +66,11 @@ class RmatRmatModel(pl.LightningModule):
                 self.thresholds[target] = thresholds[target]
         self.heads = nn.ModuleDict(heads)
         self.threshold_heads = nn.ModuleDict(threshold_heads)
+        self.class_weights = {
+            "Ki": 0.15,
+            "IC50": 9.0,
+            "binding_score": 0.4,
+        }
 
     def forward(self, x: DataBatch):
         ligand_batch = x["data"].ligand_features
@@ -224,17 +230,28 @@ class RmatRmatModel(pl.LightningModule):
         for target in self.targets:
             # if whole target was discarded by mask then loss on empty tensors is NaN
             if target in self.threshold_heads and len(y[target]["threshold"]) > 0:
+                weights = 1 - y[target]["threshold"] + y[target]["threshold"] * self.class_weights[target]
                 loss_threshold = nn.functional.binary_cross_entropy(
-                    y_hat[target]["threshold"], y[target]["threshold"]
+                    y_hat[target]["threshold"],
+                    y[target]["threshold"],
+                    weight=weights.reshape(-1, 1)
                 )
+
                 loss += loss_threshold
+                predicted_labels = y_hat[target]["threshold"] > 0.5
+                accuracy = (predicted_labels == (y[target]["threshold"] > 0.5)).float().mean()
 
                 self.log("train/loss_" + target + "/threshold", loss_threshold)
+                self.log("train/" + target + "_threshold_accuracy", accuracy)
+                self.log("train/" + target + "_threshold_mean_predicted_label", predicted_labels.float().mean())
+                self.log("train/" + target + "_threshold_mean_label", y[target]["threshold"].mean())
             # if whole target was discarded by mask then loss on empty tensors is NaN
             if len(y[target]["value"]) > 0:
                 loss_value = nn.functional.mse_loss(
                     y_hat[target]["value"], y[target]["value"]
                 )
+                if target in {"IC50", "Ki"}:
+                    loss_value *= self.hparams.activity_importance
                 loss += loss_value
 
                 self.log("train/loss_" + target + "/value", loss_value)
