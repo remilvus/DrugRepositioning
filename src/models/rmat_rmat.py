@@ -290,27 +290,78 @@ class RmatRmatModel(pl.LightningModule):
             y[target]["value"] = values[x["mask"][target]["value"], None]
         return x, y
 
-    # def validation_step(self, batch, batch_idx):
-    #     y = torch.cat(
-    #         [batch.activity.unsqueeze(1), batch.binding_score.unsqueeze(1)], dim=1
-    #     )
-    #     y_hat = self(batch)
-    #     loss = nn.functional.mse_loss(y_hat, y)
-    #
-    #     self.log("val/loss", loss)
-    #     return loss
-    #
-    #
-    # def test_step(self, batch, batch_idx):
-    #     y = torch.cat(
-    #         [batch.activity.unsqueeze(1), batch.binding_score.unsqueeze(1)], dim=1
-    #     )
-    #     y_hat = self(batch)
-    #     loss = nn.functional.mse_loss(y_hat, y)
-    #
-    #     self.log("test/loss", loss)
-    #     return loss
+    def validation_step(self, batch, batch_idx):
+        y_hat, y = self(batch)
+        loss = 0
+        for target in self.targets:
+            # if whole target was discarded by mask then loss on empty tensors is NaN
+            if target in self.threshold_heads and len(y[target]["threshold"]) > 0:
+                loss_threshold = nn.functional.binary_cross_entropy(
+                    y_hat[target]["threshold"],
+                    y[target]["threshold"],
+                    weight=self._get_class_weights(target, y),
+                )
 
-    def configure_optimizers(self):
+                loss += loss_threshold
+                accuracy, predicted_labels = self._summarise_predictions(
+                    target, y, y_hat
+                )
+
+                self._log_classification(
+                    "val", accuracy, loss_threshold, predicted_labels, target, y
+                )
+
+            # if whole target was discarded by mask then loss on empty tensors is NaN
+            if len(y[target]["value"]) > 0:
+                loss_value = nn.functional.mse_loss(
+                    y_hat[target]["value"], y[target]["value"]
+                )
+
+                loss_value = self._scale_loss(loss_value, target)
+                loss += loss_value
+
+                self.log("val/loss_" + target + "/value", loss_value)
+
+        self.log("val/loss", loss)
+        return loss
+
+
+    def test_step(self, batch, batch_idx):
+        y_hat, y = self(batch)
+        loss = 0
+        for target in self.targets:
+            # if whole target was discarded by mask then loss on empty tensors is NaN
+            if target in self.threshold_heads and len(y[target]["threshold"]) > 0:
+                loss_threshold = nn.functional.binary_cross_entropy(
+                    y_hat[target]["threshold"],
+                    y[target]["threshold"],
+                    weight=self._get_class_weights(target, y),
+                )
+
+                loss += loss_threshold
+                accuracy, predicted_labels = self._summarise_predictions(
+                    target, y, y_hat
+                )
+
+                self._log_classification(
+                    "test", accuracy, loss_threshold, predicted_labels, target, y
+                )
+
+            # if whole target was discarded by mask then loss on empty tensors is NaN
+            if len(y[target]["value"]) > 0:
+                loss_value = nn.functional.mse_loss(
+                    y_hat[target]["value"], y[target]["value"]
+                )
+
+                loss_value = self._scale_loss(loss_value, target)
+                loss += loss_value
+
+                self.log("test/loss_" + target + "/value", loss_value)
+
+        self.log("test/loss", loss)
+        return loss
+
+
+def configure_optimizers(self):
         optimizer = optim.AdamW(self.parameters(), lr=self.hparams.lr)
         return optimizer
