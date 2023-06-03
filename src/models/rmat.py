@@ -284,7 +284,6 @@ class RmatModel(pl.LightningModule):
         self.log("test/loss", loss)
         return loss
 
-
-def configure_optimizers(self):
-    optimizer = optim.AdamW(self.parameters(), lr=self.hparams.lr)
-    return optimizer
+    def configure_optimizers(self):
+        optimizer = optim.AdamW(self.parameters(), lr=self.hparams.lr)
+        return optimizer
