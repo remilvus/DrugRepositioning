@@ -72,7 +72,9 @@ class RmatRmatModel(pl.LightningModule):
             "binding_score": 0.4,
         }
 
-    def forward(self, x: DataBatch):
+    def forward(self, batch: DataBatch):
+        x, y = self._prepare_masked_batch(batch)
+
         ligand_batch = x["data"].ligand_features
         target_batch = x["data"].target_features
         # PL logger requires it to be float
@@ -189,21 +191,82 @@ class RmatRmatModel(pl.LightningModule):
             out_value = self.heads[target](val_input)
             output[target]["value"] = out_value
 
-        return output
+        return output, y
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch: DataBatch, batch_idx):
+        y_hat, y = self(batch)
+        loss = 0
+        for target in self.targets:
+            # if whole target was discarded by mask then loss on empty tensors is NaN
+            if target in self.threshold_heads and len(y[target]["threshold"]) > 0:
+                loss_threshold = nn.functional.binary_cross_entropy(
+                    y_hat[target]["threshold"],
+                    y[target]["threshold"],
+                    weight=self._get_class_weights(target, y),
+                )
+
+                loss += loss_threshold
+                accuracy, predicted_labels = self._summarise_predictions(
+                    target, y, y_hat
+                )
+
+                self._log_classification(
+                    "train", accuracy, loss_threshold, predicted_labels, target, y
+                )
+
+            # if whole target was discarded by mask then loss on empty tensors is NaN
+            if len(y[target]["value"]) > 0:
+                loss_value = nn.functional.mse_loss(
+                    y_hat[target]["value"], y[target]["value"]
+                )
+
+                loss_value = self._scale_loss(loss_value, target)
+                loss += loss_value
+
+                self.log("train/loss_" + target + "/value", loss_value)
+
+        self.log("train/loss", loss)
+        return loss
+
+    def _log_classification(
+        self, step_type: str, accuracy, loss_threshold, predicted_labels, target, y
+    ):
+        self.log(f"{step_type}/loss_{target}/threshold", loss_threshold)
+        self.log(f"{step_type}/{target}_threshold_accuracy", accuracy)
+        self.log(
+            f"{step_type}/{target}_threshold_mean_predicted_label",
+            predicted_labels.float().mean(),
+        )
+        self.log(
+            f"{step_type}/{target}_threshold_mean_label",
+            y[target]["threshold"].mean(),
+        )
+
+    def _summarise_predictions(self, target, y, y_hat):
+        predicted_labels = y_hat[target]["threshold"] > 0.5
+        accuracy = (predicted_labels == (y[target]["threshold"] > 0.5)).float().mean()
+        return accuracy, predicted_labels
+
+    def _scale_loss(self, loss_value, target):
+        if target in {"IC50", "Ki"}:
+            loss_value *= self.hparams.activity_importance
+        return loss_value
+
+    def _get_class_weights(self, target, y) -> torch.Tensor:
+        weights = (1 - y[target]["threshold"]) + (
+            y[target]["threshold"] * self.class_weights[target]
+        )
+
+        return weights.reshape(-1, 1)
+
+    def _prepare_masked_batch(self, batch):
         # WARNING!!!
         # masking assumes y is of shape (batch_size,1)
         y = {}
         x = {"data": batch}
         x["mask"] = {}
         for target in self.targets:
-            if target == "Ki":
-                values = batch.activity_Ki.unsqueeze(1)
-            elif target == "IC50":
-                values = batch.activity_IC50.unsqueeze(1)
-            elif target == "binding_score":
-                values = batch.binding_score.unsqueeze(1)
+            values = batch.get_regression_target(target)
 
             x["mask"][target] = {}
             mask = ~(torch.isnan(values))
@@ -225,39 +288,7 @@ class RmatRmatModel(pl.LightningModule):
 
             x["mask"][target]["value"] = mask
             y[target]["value"] = values[x["mask"][target]["value"], None]
-        y_hat = self(x)
-        loss = 0
-        for target in self.targets:
-            # if whole target was discarded by mask then loss on empty tensors is NaN
-            if target in self.threshold_heads and len(y[target]["threshold"]) > 0:
-                weights = 1 - y[target]["threshold"] + y[target]["threshold"] * self.class_weights[target]
-                loss_threshold = nn.functional.binary_cross_entropy(
-                    y_hat[target]["threshold"],
-                    y[target]["threshold"],
-                    weight=weights.reshape(-1, 1)
-                )
-
-                loss += loss_threshold
-                predicted_labels = y_hat[target]["threshold"] > 0.5
-                accuracy = (predicted_labels == (y[target]["threshold"] > 0.5)).float().mean()
-
-                self.log("train/loss_" + target + "/threshold", loss_threshold)
-                self.log("train/" + target + "_threshold_accuracy", accuracy)
-                self.log("train/" + target + "_threshold_mean_predicted_label", predicted_labels.float().mean())
-                self.log("train/" + target + "_threshold_mean_label", y[target]["threshold"].mean())
-            # if whole target was discarded by mask then loss on empty tensors is NaN
-            if len(y[target]["value"]) > 0:
-                loss_value = nn.functional.mse_loss(
-                    y_hat[target]["value"], y[target]["value"]
-                )
-                if target in {"IC50", "Ki"}:
-                    loss_value *= self.hparams.activity_importance
-                loss += loss_value
-
-                self.log("train/loss_" + target + "/value", loss_value)
-
-        self.log("train/loss", loss)
-        return loss
+        return x, y
 
     # def validation_step(self, batch, batch_idx):
     #     y = torch.cat(
@@ -268,6 +299,7 @@ class RmatRmatModel(pl.LightningModule):
     #
     #     self.log("val/loss", loss)
     #     return loss
+    #
     #
     # def test_step(self, batch, batch_idx):
     #     y = torch.cat(
