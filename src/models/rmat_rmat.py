@@ -362,6 +362,6 @@ class RmatRmatModel(pl.LightningModule):
         return loss
 
 
-def configure_optimizers(self):
+    def configure_optimizers(self):
         optimizer = optim.AdamW(self.parameters(), lr=self.hparams.lr)
         return optimizer
