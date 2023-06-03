@@ -16,7 +16,7 @@ if __name__ == "__main__":
     torch.random.manual_seed(0)
 
     configs = {
-        "lr": [1e-3],
+        "lr": [1e-5],
         "batch_size": [32],
         "model": ["RMatRMat"],
         # "model": ["RMatRMat", "RMatSchnet", "RMat"],
@@ -24,6 +24,7 @@ if __name__ == "__main__":
         "targets": [
             ["binding_score", "IC50", "Ki"]
         ],  # in ['Ki','IC50','binding_score']
+        "activity_importance": [1.0],
         "thresholds": [
             {
                 "binding_score": (-torch.inf, -9.0),

@@ -20,6 +20,16 @@ class DataBatch(RecursiveToDeviceMixin):
     activity_IC50: torch.FloatTensor
     binding_score: torch.FloatTensor
 
+    def get_regression_target(self, target):
+        if target == "Ki":
+            return self.activity_Ki.unsqueeze(1)
+        elif target == "IC50":
+            return self.activity_IC50.unsqueeze(1)
+        elif target == "binding_score":
+            return self.binding_score.unsqueeze(1)
+        else:
+            raise ValueError(f"Bad regression target `{target}`!")
+
 
 def merge_collate_fns(ligand_collate_fn, target_collate_fn):
     def collate_fn(datapoints: list[DataPoint]):
@@ -63,8 +73,8 @@ class LigandTargetActivityAndBindingDataModule(pl.LightningDataModule):
         target_featurizer: Featurizer,
         path: Path = Path("data/"),
         batch_size: int = 32,
-        test_size: float = 0.2,
-        val_size: float = 0.00001,
+        test_size: float = 0.1,
+        val_size: float = 0.1,
         num_workers: int = 0,
     ):
         super().__init__()
