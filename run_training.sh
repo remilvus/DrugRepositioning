@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=drugsformer
-#SBATCH --qos=test
+#SBATCH --qos=big
 #SBATCH --gres=gpu:1
 #SBATCH --mem=16G
-#SBATCH --cpus-per-task=10
+#SBATCH --cpus-per-task=30
 #SBATCH --partition=student
 
 cd $HOME/DrugRepositioning

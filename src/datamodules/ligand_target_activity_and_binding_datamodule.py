@@ -104,12 +104,15 @@ class LigandTargetActivityAndBindingDataModule(pl.LightningDataModule):
         train_ligands, val_ligands = train_test_split(
             train_ligands, test_size=self.val_size
         )
-        train_targets, test_targets = train_test_split(
-            all_targets, test_size=self.test_size
-        )
-        train_targets, val_targets = train_test_split(
-            train_targets, test_size=self.val_size
-        )
+
+        # We have too few targets to split them into train, val and test
+        # train_targets, test_targets = train_test_split(
+        #     all_targets, test_size=self.test_size
+        # )
+        # train_targets, val_targets = train_test_split(
+        #     train_targets, test_size=self.val_size
+        # )
+        train_targets, val_targets, test_targets = all_targets
 
         train_ligands, val_ligands, test_ligands = (
             set(train_ligands),

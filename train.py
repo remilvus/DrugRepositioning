@@ -5,9 +5,9 @@ import pytorch_lightning as pl
 import torch
 from pytorch_lightning.loggers import WandbLogger
 
-from src.datamodules.ligand_activity_and_binding_datamodule import (
-    LigandActivityAndBindingDataModule,
-)
+# from src.datamodules.ligand_activity_and_binding_datamodule import (
+#     LigandActivityAndBindingDataModule,
+# )
 from src.datamodules import LigandTargetActivityAndBindingDataModule
 from src.featurizers import RMatFeaturizer, SchnetFeaturizer
 from src.huggingmolecules import RMatConfig
@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     configs = {
         "lr": [1e-5],
-        "batch_size": [32],
+        "batch_size": [26],
         "model": ["RMatRmat"],
         # "model": ["RMatRMat", "RMatSchnet", "RMat"],
         # "target": ["5HT1A"],  # "CYP2C8", "5HT1A", "D2"
@@ -75,12 +75,13 @@ if __name__ == "__main__":
         )
 
         if hyperparams["model"] == "RMat":
-            datamodule = LigandActivityAndBindingDataModule(
-                ligand_featurizer,
-                target=hyperparams["target"],
-                num_workers=0,
-                batch_size=batch_size,
-            )
+            pass
+            # datamodule = LigandActivityAndBindingDataModule(
+            #     ligand_featurizer,
+            #     target=hyperparams["target"],
+            #     num_workers=0,
+            #     batch_size=batch_size,
+            # )
         else:
             datamodule = LigandTargetActivityAndBindingDataModule(
                 ligand_featurizer,
