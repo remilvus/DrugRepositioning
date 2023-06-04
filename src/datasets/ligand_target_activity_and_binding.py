@@ -1,7 +1,7 @@
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import pandas as pd
 import numpy as np
@@ -40,7 +40,7 @@ class LigandTargetActivityAndBinding(Dataset):
         ligands: set,
         targets: set,
         ligand_featurizer: Featurizer,
-        target_featurizer: Featurizer,
+        target_featurizer: Optional[Featurizer] = None,
     ):
         self.data = []
         self.ligands = {}
@@ -79,18 +79,22 @@ class LigandTargetActivityAndBinding(Dataset):
         data_point.ligand_features = self.ligand_featurizer.load_from_smiles(
             data_point.ligand.smiles
         ).get_features()
-        data_point.target_features = self.target_featurizer.load_from_pdb(
-            data_point.target.pdb_file, data_point.target.pocket_center
-        ).get_features()
+        if self.target_featurizer is not None:
+            data_point.target_features = self.target_featurizer.load_from_pdb(
+                data_point.target.pdb_file, data_point.target.pocket_center
+            ).get_features()
         return data_point
 
     def __len__(self):
         return len(self.data)
 
     @staticmethod
-    def available_ligands(path):
+    def available_ligands(path: Path, target: Optional[str] = None):
         ligands = set()
-        for csv_file in path.glob("*.csv"):
+        csv_files = path.glob("*.csv")
+        if target is not None:
+            csv_files = path.glob(f"*{target}.csv")
+        for csv_file in csv_files:
             df = pd.read_csv(csv_file)
             ligands.update(
                 {

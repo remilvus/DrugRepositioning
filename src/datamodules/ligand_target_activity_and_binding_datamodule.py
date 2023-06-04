@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
+
 import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader
@@ -14,8 +16,8 @@ from src.huggingmolecules import RecursiveToDeviceMixin
 class DataBatch(RecursiveToDeviceMixin):
     ligand: list[Ligand]
     ligand_features: torch.FloatTensor
-    target: list[Target]
-    target_features: torch.FloatTensor
+    target: Optional[list[Target]]
+    target_features: Optional[torch.FloatTensor]
     activity_Ki: torch.FloatTensor
     activity_IC50: torch.FloatTensor
     binding_score: torch.FloatTensor

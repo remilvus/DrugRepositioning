@@ -5,11 +5,15 @@ import pytorch_lightning as pl
 import torch
 from pytorch_lightning.loggers import WandbLogger
 
+from src.datamodules.ligand_activity_and_binding_datamodule import (
+    LigandActivityAndBindingDataModule,
+)
 from src.datamodules import LigandTargetActivityAndBindingDataModule
 from src.featurizers import RMatFeaturizer, SchnetFeaturizer
 from src.huggingmolecules import RMatConfig
 from src.models.common import CrossAttentionType
 from src.models.rmat_rmat import RmatRmatModel
+from src.models.rmat import RmatModel
 
 if __name__ == "__main__":
     np.random.seed(0)
@@ -18,8 +22,9 @@ if __name__ == "__main__":
     configs = {
         "lr": [1e-5],
         "batch_size": [32],
-        "model": ["RMatRMat"],
+        "model": ["RMatRmat"],
         # "model": ["RMatRMat", "RMatSchnet", "RMat"],
+        # "target": ["5HT1A"],  # "CYP2C8", "5HT1A", "D2"
         "cross_attention": [CrossAttentionType.NONE],
         "targets": [
             ["binding_score", "IC50", "Ki"]
@@ -46,7 +51,7 @@ if __name__ == "__main__":
 
     for hyperparams in configs:
         hyperparams = dict(hyperparams)
-        batch_size = hyperparams['batch_size']
+        batch_size = hyperparams["batch_size"]
 
         ligand_featurizer = RMatFeaturizer(use_bonds=False, cutout=False)
 
@@ -69,12 +74,20 @@ if __name__ == "__main__":
             reinit=True,
         )
 
-        datamodule = LigandTargetActivityAndBindingDataModule(
-            ligand_featurizer,
-            target_featurizer,
-            num_workers=0,
-            batch_size=batch_size,
-        )
+        if hyperparams["model"] == "RMat":
+            datamodule = LigandActivityAndBindingDataModule(
+                ligand_featurizer,
+                target=hyperparams["target"],
+                num_workers=0,
+                batch_size=batch_size,
+            )
+        else:
+            datamodule = LigandTargetActivityAndBindingDataModule(
+                ligand_featurizer,
+                target_featurizer,
+                num_workers=0,
+                batch_size=batch_size,
+            )
 
         if hyperparams["model"] == "RMatRMat":
             model = RmatRmatModel(
@@ -84,8 +97,9 @@ if __name__ == "__main__":
             # TODO: implement RMatSchnet
             ...
         elif hyperparams["model"] == "RMat":
-            # TODO: implement RMat processing combined features
-            ...
+            model = RmatModel(
+                rmat_config=RMatConfig.get_default(use_bonds=False), **hyperparams
+            )
 
         trainer = pl.Trainer(
             max_epochs=100,
