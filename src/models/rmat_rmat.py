@@ -325,7 +325,6 @@ class RmatRmatModel(pl.LightningModule):
         self.log("val/loss", loss)
         return loss
 
-
     def test_step(self, batch, batch_idx):
         y_hat, y = self(batch)
         loss = 0
@@ -360,7 +359,6 @@ class RmatRmatModel(pl.LightningModule):
 
         self.log("test/loss", loss)
         return loss
-
 
     def configure_optimizers(self):
         optimizer = optim.AdamW(self.parameters(), lr=self.hparams.lr)
