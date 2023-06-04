@@ -100,7 +100,8 @@ class RmatModel(pl.LightningModule):
             ligand_latent, ligand_batch_mask, edges_att=ligand_edges_att
         )
 
-        latent_code = self.aggregator(ligand_encoded)  # TODO - the shape could be wrong
+        # Aggregating from dummy node
+        latent_code = self.aggregator(ligand_encoded[:, 0, :])
 
         output = {}
         for target in self.targets:
