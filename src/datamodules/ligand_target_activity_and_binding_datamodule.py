@@ -112,7 +112,10 @@ class LigandTargetActivityAndBindingDataModule(pl.LightningDataModule):
         # train_targets, val_targets = train_test_split(
         #     train_targets, test_size=self.val_size
         # )
-        train_targets, val_targets, test_targets = all_targets
+        # TODO: what was the original 'train_targets, val_targets, test_targets = all_targets' supposed to to?
+        train_targets = all_targets
+        val_targets = all_targets
+        test_targets = all_targets
 
         train_ligands, val_ligands, test_ligands = (
             set(train_ligands),

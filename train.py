@@ -18,11 +18,11 @@ from src.models.rmat import RmatModel
 if __name__ == "__main__":
     np.random.seed(0)
     torch.random.manual_seed(0)
-
+    # batch[].target[].name
     configs = {
         "lr": [1e-5],
-        "batch_size": [26],
-        "model": ["RMatRmat"],
+        "batch_size": [8],
+        "model": ["RMatRMat"],
         # "model": ["RMatRMat", "RMatSchnet", "RMat"],
         # "target": ["5HT1A"],  # "CYP2C8", "5HT1A", "D2"
         "cross_attention": [CrossAttentionType.NONE],
