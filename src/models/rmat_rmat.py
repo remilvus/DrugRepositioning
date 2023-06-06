@@ -1,5 +1,6 @@
 import logging
 
+import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -14,15 +15,15 @@ from src.huggingmolecules.models.models_common_utils import clones
 
 class RmatRmatModel(pl.LightningModule):
     def __init__(
-        self,
-        lr: float = 1e-3,
-        cross_attention_type: CrossAttentionType = CrossAttentionType.NONE,
-        rmat_config: RMatConfig = RMatConfig.get_default(use_bonds=False),
-        latent_size: int = None,
-        targets=[],
-        thresholds={},
-        activity_importance=0.0,
-        **kwargs,
+            self,
+            lr: float = 1e-3,
+            cross_attention_type: CrossAttentionType = CrossAttentionType.NONE,
+            rmat_config: RMatConfig = RMatConfig.get_default(use_bonds=False),
+            latent_size: int = None,
+            targets=[],
+            thresholds={},
+            activity_importance=0.0,
+            **kwargs,
     ):
         assert len(targets) > 0
         assert all((target in ["Ki", "IC50", "binding_score"]) for target in targets)
@@ -72,8 +73,7 @@ class RmatRmatModel(pl.LightningModule):
             "binding_score": 0.4,
         }
 
-    def forward(self, batch: DataBatch):
-        x, y = self._prepare_masked_batch(batch)
+    def forward(self, x):
 
         ligand_batch = x["data"].ligand_features
         target_batch = x["data"].target_features
@@ -88,10 +88,10 @@ class RmatRmatModel(pl.LightningModule):
         )
 
         ligand_batch_mask = (
-            torch.sum(torch.abs(ligand_batch.node_features), dim=-1) != 0
+                torch.sum(torch.abs(ligand_batch.node_features), dim=-1) != 0
         )
         target_batch_mask = (
-            torch.sum(torch.abs(target_batch.node_features), dim=-1) != 0
+                torch.sum(torch.abs(target_batch.node_features), dim=-1) != 0
         )
 
         ligand_latent = self.ligand_rmat.src_embed(ligand_batch.node_features)
@@ -125,10 +125,10 @@ class RmatRmatModel(pl.LightningModule):
             ligand_edges_att = target_edges_att = None
 
         for (
-            ligand_rmat_encoder_layer,
-            target_rmat_encoder_layer,
-            ligand_ca_layer,
-            target_ca_layer,
+                ligand_rmat_encoder_layer,
+                target_rmat_encoder_layer,
+                ligand_ca_layer,
+                target_ca_layer,
         ) in zip(
             self.ligand_rmat.encoder.layers,
             self.target_rmat.encoder.layers,
@@ -191,27 +191,27 @@ class RmatRmatModel(pl.LightningModule):
             out_value = self.heads[target](val_input)
             output[target]["value"] = out_value
 
-        return output, y
+        return output
 
     def training_step(self, batch: DataBatch, batch_idx):
-
-        y_hat, y = self(batch)
-        loss = self.get_and_log_loss(y, y_hat,batch,prefix='train')
+        x,y = self._prepare_masked_batch(batch)
+        y_hat= self(x)
+        loss = self.get_and_log_loss(y, y_hat, batch,x, prefix='train')
         return loss
 
     def _log_classification(
-        self, step_type: str, accuracy, loss_threshold, predicted_labels, target, y, protein=''
+            self, step_type: str, accuracy, loss_threshold, predicted_labels, target, y, protein=''
     ):
-        if len(protein)>0:
-            protein = '_'+protein
-        self.log(f"{step_type}/loss_{target}/threshold", loss_threshold)
-        self.log(f"{step_type}/{target}_threshold_accuracy", accuracy)
+        if len(protein) > 0:
+            protein = '/' + protein
+        self.log(f"{step_type}/loss_{target}{protein}/threshold", loss_threshold)
+        self.log(f"{step_type}/{target}{protein}_threshold_accuracy", accuracy)
         self.log(
-            f"{step_type}/{target}_threshold_mean_predicted_label",
+            f"{step_type}/{target}{protein}_threshold_mean_predicted_label",
             predicted_labels.float().mean(),
         )
         self.log(
-            f"{step_type}/{target}_threshold_mean_label",
+            f"{step_type}/{target}{protein}_threshold_mean_label",
             y[target]["threshold"].mean(),
         )
 
@@ -227,7 +227,7 @@ class RmatRmatModel(pl.LightningModule):
 
     def _get_class_weights(self, target, y) -> torch.Tensor:
         weights = (1 - y[target]["threshold"]) + (
-            y[target]["threshold"] * self.class_weights[target]
+                y[target]["threshold"] * self.class_weights[target]
         )
 
         return weights.reshape(-1, 1)
@@ -248,11 +248,11 @@ class RmatRmatModel(pl.LightningModule):
                 # for threshold head mask only nans
                 x["mask"][target]["threshold"] = mask
                 threshold_mask = (self.thresholds[target][0] <= values) & (
-                    values <= self.thresholds[target][1]
+                        values <= self.thresholds[target][1]
                 )
                 # ones * (value < threshold)
                 threshold_target = (
-                    torch.ones_like(values) * threshold_mask.int().float()
+                        torch.ones_like(values) * threshold_mask.int().float()
                 )
                 # filter out entries where value==NaN
                 threshold_target = threshold_target[mask, None]
@@ -264,12 +264,17 @@ class RmatRmatModel(pl.LightningModule):
         return x, y
 
     def validation_step(self, batch, batch_idx):
-        y_hat, y = self(batch)
-        loss = self.get_and_log_loss(y, y_hat,batch,prefix='val')
+        x,y = self._prepare_masked_batch(batch)
+        y_hat= self(x)
+        loss = self.get_and_log_loss(y, y_hat, batch,x, prefix='val')
         return loss
 
-    def get_and_log_loss(self, y, y_hat,batch,prefix=''):
+    def get_and_log_loss(self, y, y_hat, batch,x, prefix=''):
         loss = 0
+        proteins = [batch.target[i].name for i in range(len(batch.target))]
+        proteins_hash = torch.Tensor([hash(i) for i in proteins])
+        proteins = np.array(proteins)
+        unique_proteins = np.unique(proteins)
         for target in self.targets:
             # if whole target was discarded by mask then loss on empty tensors is NaN
             if target in self.threshold_heads and len(y[target]["threshold"]) > 0:
@@ -287,6 +292,22 @@ class RmatRmatModel(pl.LightningModule):
                 self._log_classification(
                     prefix, accuracy, loss_threshold, predicted_labels, target, y
                 )
+                for qq,name in enumerate(unique_proteins):
+                    prot_mask = torch.Tensor((proteins_hash == hash(name))).unsqueeze(-1).to(x["mask"][target]["threshold"].device)
+                    # yeah, sure. Counterpoint: it works.
+                    prot_mask = prot_mask[x["mask"][target]["threshold"]]
+                    if torch.any(prot_mask):
+                        loss_threshold = nn.functional.binary_cross_entropy(
+                            y_hat[target]["threshold"][prot_mask],
+                            y[target]["threshold"][prot_mask],
+                            weight=self._get_class_weights(target, y)[prot_mask],
+                        )
+                        self._log_classification(
+                            prefix, accuracy, loss_threshold, predicted_labels, target, y, protein=name
+                        )
+                        # TODO: can be removed after 1 epoch of successful training
+                        if torch.isnan(loss_threshold):
+                            raise IndexError('oops')
 
             # if whole target was discarded by mask then loss on empty tensors is NaN
             if len(y[target]["value"]) > 0:
@@ -297,13 +318,28 @@ class RmatRmatModel(pl.LightningModule):
                 loss_value = self._scale_loss(loss_value, target)
                 loss += loss_value
 
-                self.log(prefix+"/loss_" + target + "/value", loss_value)
-        self.log(prefix+"/loss", loss)
+                self.log(prefix + "/loss_" + target + "/value", loss_value)
+                for qq, name in enumerate(unique_proteins):
+                    prot_mask = torch.Tensor((proteins_hash == hash(name))).unsqueeze(-1).to(
+                        x["mask"][target]["value"].device)
+                    prot_mask = prot_mask[x["mask"][target]["value"]]
+                    if torch.any(prot_mask):
+                        loss_value = nn.functional.mse_loss(
+                            y_hat[target]["value"],
+                            y[target]["value"]
+                        )
+                        loss_value = self._scale_loss(loss_value, target)
+                        self.log(f"{prefix}/{name}/loss", loss_value)
+                        # TODO: can be removed after 1 epoch of successful training
+                        if torch.isnan(loss_value):
+                            raise IndexError('oops')
+        self.log(f"{prefix}/loss", loss)
         return loss
 
     def test_step(self, batch, batch_idx):
-        y_hat, y = self(batch)
-        loss = self.get_and_log_loss(y, y_hat,batch,prefix='test')
+        x,y = self._prepare_masked_batch(batch)
+        y_hat= self(x)
+        loss = self.get_and_log_loss(y, y_hat, batch, x, prefix='test')
         return loss
 
     def configure_optimizers(self):
