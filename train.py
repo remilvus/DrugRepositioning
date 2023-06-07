@@ -42,23 +42,23 @@ if __name__ == "__main__":
     # }
 
     # Mateusz #1
-    configs = {
-        "lr": [1e-5],
-        "batch_size": [26],
-        "model": ["RMatRMat"],
-        "cross_attention": [CrossAttentionType.NONE],
-        "targets": [
-            ["binding_score", "IC50", "Ki"]
-        ],
-        "activity_importance": [1.0],
-        "thresholds": [
-            {
-                "binding_score": (-torch.inf, -9.0),
-                "IC50": (-torch.inf, np.log10(900.0)),
-                "Ki": (-torch.inf, np.log10(3000.0)),
-            }
-        ]
-    }
+    # configs = {
+    #     "lr": [1e-5],
+    #     "batch_size": [26],
+    #     "model": ["RMatRMat"],
+    #     "cross_attention": [CrossAttentionType.NONE],
+    #     "targets": [
+    #         ["binding_score", "IC50", "Ki"]
+    #     ],
+    #     "activity_importance": [1.0],
+    #     "thresholds": [
+    #         {
+    #             "binding_score": (-torch.inf, -9.0),
+    #             "IC50": (-torch.inf, np.log10(900.0)),
+    #             "Ki": (-torch.inf, np.log10(3000.0)),
+    #         }
+    #     ]
+    # }
 
     # Mateusz #2
     configs = {
@@ -79,43 +79,43 @@ if __name__ == "__main__":
         ]
     }
 
-    # Adam/Michal #1
-    configs = {
-        "lr": [1e-5],
-        "batch_size": [26],
-        "model": ["RMatSchNet"],
-        "cross_attention": [CrossAttentionType.NONE],
-        "targets": [
-            ["binding_score", "IC50", "Ki"]
-        ],
-        "activity_importance": [1.0],
-        "thresholds": [
-            {
-                "binding_score": (-torch.inf, -9.0),
-                "IC50": (-torch.inf, np.log10(900.0)),
-                "Ki": (-torch.inf, np.log10(3000.0)),
-            }
-        ]
-    }
-
-    # Adam/Michal #2
-    configs = {
-        "lr": [1e-5],
-        "batch_size": [26],
-        "model": ["RMatSchNet"],
-        "cross_attention": [CrossAttentionType.BOTH],
-        "targets": [
-            ["binding_score", "IC50", "Ki"]
-        ],
-        "activity_importance": [1.0],
-        "thresholds": [
-            {
-                "binding_score": (-torch.inf, -9.0),
-                "IC50": (-torch.inf, np.log10(900.0)),
-                "Ki": (-torch.inf, np.log10(3000.0)),
-            }
-        ]
-    }
+    # # Adam/Michal #1
+    # configs = {
+    #     "lr": [1e-5],
+    #     "batch_size": [26],
+    #     "model": ["RMatSchNet"],
+    #     "cross_attention": [CrossAttentionType.NONE],
+    #     "targets": [
+    #         ["binding_score", "IC50", "Ki"]
+    #     ],
+    #     "activity_importance": [1.0],
+    #     "thresholds": [
+    #         {
+    #             "binding_score": (-torch.inf, -9.0),
+    #             "IC50": (-torch.inf, np.log10(900.0)),
+    #             "Ki": (-torch.inf, np.log10(3000.0)),
+    #         }
+    #     ]
+    # }
+    #
+    # # Adam/Michal #2
+    # configs = {
+    #     "lr": [1e-5],
+    #     "batch_size": [26],
+    #     "model": ["RMatSchNet"],
+    #     "cross_attention": [CrossAttentionType.BOTH],
+    #     "targets": [
+    #         ["binding_score", "IC50", "Ki"]
+    #     ],
+    #     "activity_importance": [1.0],
+    #     "thresholds": [
+    #         {
+    #             "binding_score": (-torch.inf, -9.0),
+    #             "IC50": (-torch.inf, np.log10(900.0)),
+    #             "Ki": (-torch.inf, np.log10(3000.0)),
+    #         }
+    #     ]
+    # }
 
 
     # docking score that is related to the free energy of binding of a ligand to a receptor.
@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
         ligand_featurizer = RMatFeaturizer(use_bonds=False, cutout=False)
 
-        if hyperparams["model"] in ["RMatSchnet"]:
+        if hyperparams["model"] in ["RMatSchNet"]:
             target_featurizer = SchnetFeaturizer(
                 # Michal
                 use_bonds=False, cutout=True, cutout_radius=10.0
@@ -176,7 +176,7 @@ if __name__ == "__main__":
             model = RmatRmatModel(
                 rmat_config=RMatConfig.get_default(use_bonds=False), **hyperparams
             )
-        elif hyperparams["model"] == "RMatSchnet":
+        elif hyperparams["model"] == "RMatSchNet":
             model = RMatSchNetModel(
                 rmat_config=RMatConfig.get_default(use_bonds=False), **hyperparams
             )
