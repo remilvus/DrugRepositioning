@@ -14,7 +14,7 @@ from src.huggingmolecules import RMatConfig
 from src.models.common import CrossAttentionType
 from src.models.rmat_rmat import RmatRmatModel
 from src.models.rmat import RmatModel
-from src.models.schnet_rmat import SchnetRmatModel
+from src.models.schnet_rmat import RMatSchNetModel
 
 if __name__ == "__main__":
     np.random.seed(0)
@@ -97,7 +97,7 @@ if __name__ == "__main__":
             )
         elif hyperparams["model"] == "RMatSchnet":
             # TODO: implement RMatSchnet
-            model = SchnetRmatModel(
+            model = RMatSchNetModel(
                 rmat_config=RMatConfig.get_default(use_bonds=False), **hyperparams
             )
         elif hyperparams["model"] == "RMat":

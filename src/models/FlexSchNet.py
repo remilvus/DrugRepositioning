@@ -47,9 +47,7 @@ class Flexible_latent_SchNet(SchNet):
         edge_attr = self.distance_expansion(edge_weight)
 
         for num,interaction in enumerate(self.interactions):
-            # print(num,'in ',h.shape)
             h = h + interaction(h, edge_index, edge_weight, edge_attr)
-            # print(num,'out',h.shape)
 
 
         h = self.lin1(h)
