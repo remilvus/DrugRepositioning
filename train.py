@@ -57,7 +57,7 @@ if __name__ == "__main__":
                 "IC50": (-torch.inf, np.log10(900.0)),
                 "Ki": (-torch.inf, np.log10(3000.0)),
             }
-
+        ]
     }
 
     # Mateusz #2
@@ -76,7 +76,7 @@ if __name__ == "__main__":
                 "IC50": (-torch.inf, np.log10(900.0)),
                 "Ki": (-torch.inf, np.log10(3000.0)),
             }
-
+        ]
     }
 
     # Adam/Michal #1
@@ -95,7 +95,7 @@ if __name__ == "__main__":
                 "IC50": (-torch.inf, np.log10(900.0)),
                 "Ki": (-torch.inf, np.log10(3000.0)),
             }
-
+        ]
     }
 
     # Adam/Michal #2
@@ -114,7 +114,7 @@ if __name__ == "__main__":
                 "IC50": (-torch.inf, np.log10(900.0)),
                 "Ki": (-torch.inf, np.log10(3000.0)),
             }
-
+        ]
     }
 
 
