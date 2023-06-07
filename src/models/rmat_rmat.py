@@ -31,8 +31,8 @@ class RmatRmatModel(pl.LightningModule):
         self.save_hyperparameters()
 
         # Base RMats
-        self.ligand_rmat = RMatModel(rmat_config)
-        self.target_rmat = RMatModel(rmat_config)
+        self.ligand_net = RMatModel(rmat_config)
+        self.target_net = RMatModel(rmat_config)
 
         # Cross-attention layers
         ca_layer = CrossAttentionLayer(rmat_config)
@@ -94,13 +94,13 @@ class RmatRmatModel(pl.LightningModule):
                 torch.sum(torch.abs(target_batch.node_features), dim=-1) != 0
         )
 
-        ligand_latent = self.ligand_rmat.src_embed(ligand_batch.node_features)
-        target_latent = self.target_rmat.src_embed(target_batch.node_features)
+        ligand_latent = self.ligand_net.src_embed(ligand_batch.node_features)
+        target_latent = self.target_net.src_embed(target_batch.node_features)
 
-        ligand_distances_matrix = self.ligand_rmat.dist_rbf(
+        ligand_distances_matrix = self.ligand_net.dist_rbf(
             ligand_batch.distance_matrix
         )
-        target_distances_matrix = self.target_rmat.dist_rbf(
+        target_distances_matrix = self.target_net.dist_rbf(
             target_batch.distance_matrix
         )
 
@@ -130,8 +130,8 @@ class RmatRmatModel(pl.LightningModule):
                 ligand_ca_layer,
                 target_ca_layer,
         ) in zip(
-            self.ligand_rmat.encoder.layers,
-            self.target_rmat.encoder.layers,
+            self.ligand_net.encoder.layers,
+            self.target_net.encoder.layers,
             self.ligand_ca_layers,
             self.target_ca_layers,
         ):
@@ -170,13 +170,18 @@ class RmatRmatModel(pl.LightningModule):
                 new_target_latent = target_latent
             ligand_latent, target_latent = new_ligand_latent, new_target_latent
 
-        ligand_encoded = self.ligand_rmat.encoder.norm(ligand_latent)
-        target_encoded = self.target_rmat.encoder.norm(target_latent)
+        ligand_encoded = self.ligand_net.encoder.norm(ligand_latent)
+        target_encoded = self.target_net.encoder.norm(target_latent)
 
         # Aggregating from dummy node
         latent_code = self.aggregator(
             torch.cat([ligand_encoded[:, 0, :], target_encoded[:, 0, :]], dim=1)
         )
+        output = self.get_head_outputs(latent_code, x)
+
+        return output
+
+    def get_head_outputs(self, latent_code, x):
         output = {}
         # output['latent_code'] = latent_code
         for target in self.targets:
@@ -190,7 +195,6 @@ class RmatRmatModel(pl.LightningModule):
             val_input = latent_code[x["mask"][target]["value"], None]
             out_value = self.heads[target](val_input)
             output[target]["value"] = out_value
-
         return output
 
     def training_step(self, batch: DataBatch, batch_idx):
