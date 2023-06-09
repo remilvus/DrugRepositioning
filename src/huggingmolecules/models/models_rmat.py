@@ -187,7 +187,7 @@ class RMatAttention(nn.Module):
         edges_att_v=None,
     ):
         """Compute 'Scaled Dot Product Attention'"""
-        b, h, n, d_k = query.size(0), query.size(1), query.size(2), query.size(-1)
+        b, h, n, d_k = query.size(0), query.size(1), key.size(2), query.size(-1)
 
         scores1 = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
 
@@ -208,9 +208,8 @@ class RMatAttention(nn.Module):
             scores = scores1 + scores2 + scores3 + scores4  # + scores5
         else:
             scores = scores1
-
         if mask is not None:
-            scores = scores.masked_fill(mask.unsqueeze(1).repeat(1, h, n, 1) == 0, -inf)
+            scores = scores.masked_fill(mask.unsqueeze(-1).repeat(1, h, 1, n) == 0, -inf)
         p_attn = F.softmax(scores, dim=-1)
 
         p_attn = dropout(p_attn)
@@ -225,7 +224,6 @@ class RMatAttention(nn.Module):
             atoms_features2 = 0
 
         atoms_features = atoms_features1 + atoms_features2
-
         return atoms_features, p_attn
 
 

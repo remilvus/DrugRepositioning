@@ -33,11 +33,11 @@ class CrossAttentionLayer(nn.Module):
         self.size = rmat_config.d_model
 
     def forward(self, vk: torch.Tensor, q: torch.Tensor, mask: torch.Tensor, **kwargs):
-        x = vk
+        x = q
         vk = self.vk_norm(vk)
         q = self.q_norm(q)
         a = self.cross_attn(q, vk, vk, mask=mask, **kwargs)
-        return x + self.dropout(a)
+        return x+self.dropout(a)
 
 
 class Head(nn.Module):

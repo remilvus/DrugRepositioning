@@ -26,7 +26,7 @@ if __name__ == "__main__":
     #     "model": ["RMatSchnet"],# ["RMatRMat"],#
     #     # "model": ["RMatRMat", "RMatSchnet", "RMat"],
     #     # "target": ["5HT1A"],  # "CYP2C8", "5HT1A", "D2"
-    #     "cross_attention": [CrossAttentionType.NONE],
+    #     "cross_attention_type": [CrossAttentionType.NONE],
     #     "targets": [
     #         ["binding_score", "IC50", "Ki"]
     #     ],  # in ['Ki','IC50','binding_score']
@@ -38,34 +38,15 @@ if __name__ == "__main__":
     #             "Ki": (-torch.inf, np.log10(3000.0)),
     #         }
     #     ],  # in ['Ki','IC50','binding_score']
-    #     # "cross_attention": [CrossAttentionType.NONE, CrossAttentionType.LIGAND, CrossAttentionType.TARGET, CrossAttentionType.BOTH],
+    #     # "cross_attention_type": [CrossAttentionType.NONE, CrossAttentionType.LIGAND, CrossAttentionType.TARGET, CrossAttentionType.BOTH],
     # }
-
+    """
     # Mateusz #1
-    # configs = {
-    #     "lr": [1e-5],
-    #     "batch_size": [26],
-    #     "model": ["RMatRMat"],
-    #     "cross_attention": [CrossAttentionType.NONE],
-    #     "targets": [
-    #         ["binding_score", "IC50", "Ki"]
-    #     ],
-    #     "activity_importance": [1.0],
-    #     "thresholds": [
-    #         {
-    #             "binding_score": (-torch.inf, -9.0),
-    #             "IC50": (-torch.inf, np.log10(900.0)),
-    #             "Ki": (-torch.inf, np.log10(3000.0)),
-    #         }
-    #     ]
-    # }
-
-    # Mateusz #2
     configs = {
         "lr": [1e-5],
         "batch_size": [26],
         "model": ["RMatRMat"],
-        "cross_attention": [CrossAttentionType.BOTH],
+        "cross_attention_type": [CrossAttentionType.NONE],
         "targets": [
             ["binding_score", "IC50", "Ki"]
         ],
@@ -75,47 +56,69 @@ if __name__ == "__main__":
                 "binding_score": (-torch.inf, -9.0),
                 "IC50": (-torch.inf, np.log10(900.0)),
                 "Ki": (-torch.inf, np.log10(3000.0)),
-            }
-        ]
+            }]
+
+    }
+    """
+
+    # Mateusz #2
+    configs = {
+        "lr": [1e-5],
+        "batch_size": [26],
+        "model": ["RMatRMat"],
+        "cross_attention_type": [CrossAttentionType.BOTH],
+        "targets": [
+            ["binding_score", "IC50", "Ki"]
+        ],
+        "activity_importance": [1.0],
+        "thresholds": [
+            {
+                "binding_score": (-torch.inf, -9.0),
+                "IC50": (-torch.inf, np.log10(900.0)),
+                "Ki": (-torch.inf, np.log10(3000.0)),
+            }]
+
+    }
+    """
+
+    # Adam/Michal #1
+    configs = {
+        "lr": [1e-5],
+        "batch_size": [26],
+        "model": ["RMatSchNet"],
+        "cross_attention_type": [CrossAttentionType.NONE],
+        "targets": [
+            ["binding_score", "IC50", "Ki"]
+        ],
+        "activity_importance": [1.0],
+        "thresholds": [
+            {
+                "binding_score": (-torch.inf, -9.0),
+                "IC50": (-torch.inf, np.log10(900.0)),
+                "Ki": (-torch.inf, np.log10(3000.0)),
+            }]
+
     }
 
-    # # Adam/Michal #1
-    # configs = {
-    #     "lr": [1e-5],
-    #     "batch_size": [26],
-    #     "model": ["RMatSchNet"],
-    #     "cross_attention": [CrossAttentionType.NONE],
-    #     "targets": [
-    #         ["binding_score", "IC50", "Ki"]
-    #     ],
-    #     "activity_importance": [1.0],
-    #     "thresholds": [
-    #         {
-    #             "binding_score": (-torch.inf, -9.0),
-    #             "IC50": (-torch.inf, np.log10(900.0)),
-    #             "Ki": (-torch.inf, np.log10(3000.0)),
-    #         }
-    #     ]
-    # }
-    #
-    # # Adam/Michal #2
-    # configs = {
-    #     "lr": [1e-5],
-    #     "batch_size": [26],
-    #     "model": ["RMatSchNet"],
-    #     "cross_attention": [CrossAttentionType.BOTH],
-    #     "targets": [
-    #         ["binding_score", "IC50", "Ki"]
-    #     ],
-    #     "activity_importance": [1.0],
-    #     "thresholds": [
-    #         {
-    #             "binding_score": (-torch.inf, -9.0),
-    #             "IC50": (-torch.inf, np.log10(900.0)),
-    #             "Ki": (-torch.inf, np.log10(3000.0)),
-    #         }
-    #     ]
-    # }
+    # Adam/Michal #2
+    configs = {
+        "lr": [1e-5],
+        "batch_size": [26],
+        "model": ["RMatSchNet"],
+        "cross_attention_type": [CrossAttentionType.BOTH],
+        "targets": [
+            ["binding_score", "IC50", "Ki"]
+        ],
+        "activity_importance": [1.0],
+        "thresholds": [
+            {
+                "binding_score": (-torch.inf, -9.0),
+                "IC50": (-torch.inf, np.log10(900.0)),
+                "Ki": (-torch.inf, np.log10(3000.0)),
+            }]
+
+    }
+    """
 
 
     # docking score that is related to the free energy of binding of a ligand to a receptor.
