@@ -208,14 +208,14 @@ class RmatRmatModel(pl.LightningModule):
     ):
         if len(protein) > 0:
             protein = '/' + protein
-        self.log(f"{step_type}/loss_{target}{protein}/threshold", loss_threshold)
-        self.log(f"{step_type}/{target}{protein}_threshold_accuracy", accuracy)
+        self.log(f"{step_type}/loss/{target}/{protein}/threshold", loss_threshold)
+        self.log(f"{step_type}/{target}/{protein}/hreshold_accuracy", accuracy)
         self.log(
-            f"{step_type}/{target}{protein}_threshold_mean_predicted_label",
+            f"{step_type}/{target}/{protein}/threshold_mean_predicted_label",
             predicted_labels.float().mean(),
         )
         self.log(
-            f"{step_type}/{target}{protein}_threshold_mean_label",
+            f"{step_type}/{target}/{protein}/threshold_mean_label",
             y[target]["threshold"].mean(),
         )
 
@@ -322,7 +322,7 @@ class RmatRmatModel(pl.LightningModule):
                 loss_value = self._scale_loss(loss_value, target)
                 loss += loss_value
 
-                self.log(prefix + "/loss_" + target + "/value", loss_value)
+                self.log(f"{prefix}/loss/{target}/value", loss_value)
                 for qq, name in enumerate(unique_proteins):
                     prot_mask = torch.Tensor((proteins_hash == hash(name))).unsqueeze(-1).to(
                         x["mask"][target]["value"].device)
@@ -333,7 +333,7 @@ class RmatRmatModel(pl.LightningModule):
                             y[target]["value"]
                         )
                         loss_value = self._scale_loss(loss_value, target)
-                        self.log(f"{prefix}/{name}/loss", loss_value)
+                        self.log(f"{prefix}/loss/{target}/{name}/value", loss_value)
                         # TODO: can be removed after 1 epoch of successful training
                         if torch.isnan(loss_value):
                             raise IndexError('oops')
